@@ -1,0 +1,141 @@
+﻿<Window x:Class="MinatoProject.Apps.JLeagueLiveTweet.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:behavior="http://schemas.microsoft.com/xaml/behaviors"
+        xmlns:interactivity="clr-namespace:Reactive.Bindings.Interactivity;assembly=ReactiveProperty.WPF"
+        xmlns:prism="http://prismlibrary.com/"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        prism:ViewModelLocator.AutoWireViewModel="True"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        TextElement.FontWeight="Regular"
+        TextElement.FontSize="13"
+        TextOptions.TextFormattingMode="Ideal" 
+        TextOptions.TextRenderingMode="Auto"        
+        Background="{DynamicResource MaterialDesignPaper}"
+        FontFamily="{DynamicResource MaterialDesignFont}"
+        Title="{Binding Title}" Height="720" Width="960">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="3*" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0">
+            <materialDesign:ColorZone Mode="PrimaryDark" Padding="16" CornerRadius="3" materialDesign:ShadowAssist.ShadowDepth="Depth2">
+                <StackPanel Orientation="Horizontal">
+                    <ToggleButton Style="{DynamicResource MaterialDesignHamburgerToggleButton}" />
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock VerticalAlignment="Center" Margin="16 0 0 0" Style="{StaticResource MaterialDesignHeadline6TextBlock}">アルビレックス新潟</TextBlock>
+                        <TextBlock VerticalAlignment="Center" Margin="16 0 0 0" Style="{StaticResource MaterialDesignSubtitle2TextBlock}">明治安田生命 J2リーグ</TextBlock>
+                    </StackPanel>
+                </StackPanel>
+            </materialDesign:ColorZone>
+        </Grid>
+        <Grid Grid.Row="1" Margin="5">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto" />
+                <!--<RowDefinition Height="*" />-->
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0" Margin="5">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="対戦相手" VerticalAlignment="Center" Margin="0 0 5 0" />
+                    <ComboBox ItemsSource="{Binding AllClubs}" SelectedItem="{Binding SelectedClub}" DisplayMemberPath="Name" MinWidth="100" Margin="0 0 10 0">
+                        <behavior:Interaction.Triggers>
+                            <behavior:EventTrigger EventName="SelectionChanged">
+                                <interactivity:EventToReactiveCommand Command="{Binding ClubChangedCommand}" />
+                            </behavior:EventTrigger>
+                        </behavior:Interaction.Triggers>
+                    </ComboBox>
+                    <ToggleButton Style="{StaticResource MaterialDesignActionAccentToggleButton}" IsChecked="{Binding IsMyClubAway}">
+                        <behavior:Interaction.Triggers>
+                            <behavior:EventTrigger EventName="Click">
+                                <interactivity:EventToReactiveCommand Command="{Binding HomeAwayChangedCommand}" />
+                            </behavior:EventTrigger>
+                        </behavior:Interaction.Triggers>
+                        <ToggleButton.Content>
+                            <TextBlock Text="H" />
+                        </ToggleButton.Content>
+                        <materialDesign:ToggleButtonAssist.OnContent>
+                            <TextBlock Text="A" />
+                        </materialDesign:ToggleButtonAssist.OnContent>
+                    </ToggleButton>
+                </StackPanel>
+            </Grid>
+        </Grid>
+            
+        <Grid Grid.Row="2" Margin="5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="3*" />
+            </Grid.ColumnDefinitions>
+            <Grid Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid Grid.Row="0" Margin="5" Background="LightGray">
+                    <TextBlock Text="アナログ時計" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                </Grid>
+                <Grid Grid.Row="1" Margin="5" Background="LightGray">
+                    <TextBlock Text="45分計" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                </Grid>
+            </Grid>
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid Grid.Row="0" Grid.Column="0">
+                    <TextBlock Text="{Binding HomeClubName}" Style="{StaticResource MaterialDesignHeadline3TextBlock}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Grid>
+                <Grid Grid.Row="0" Grid.Column="1">
+                    <TextBlock Text="vs" Style="{StaticResource MaterialDesignHeadline3TextBlock}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Grid>
+                <Grid Grid.Row="0" Grid.Column="2">
+                    <TextBlock Text="{Binding AwayClubName}" Style="{StaticResource MaterialDesignHeadline3TextBlock}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Grid>
+
+                <Grid Grid.Row="1" Grid.Column="0">
+                    <TextBlock Text="0" Style="{StaticResource MaterialDesignHeadline4TextBlock}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Grid>
+                <Grid Grid.Row="1" Grid.Column="1">
+                    <TextBlock Text="1st" Style="{StaticResource MaterialDesignHeadline4TextBlock}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Grid>
+                <Grid Grid.Row="1" Grid.Column="2">
+                    <TextBlock Text="0" Style="{StaticResource MaterialDesignHeadline4TextBlock}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Grid>
+
+                <Grid Grid.Row="2" Grid.Column="0">
+                    <TextBlock Text="0" Style="{StaticResource MaterialDesignHeadline4TextBlock}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Grid>
+                <Grid Grid.Row="2" Grid.Column="1">
+                    <TextBlock Text="2nd" Style="{StaticResource MaterialDesignHeadline4TextBlock}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Grid>
+                <Grid Grid.Row="2" Grid.Column="2">
+                    <TextBlock Text="0" Style="{StaticResource MaterialDesignHeadline4TextBlock}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Grid>
+
+                <Border Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" BorderThickness="1" BorderBrush="DarkGray" Margin="10 0 10 0" />
+                <Grid Grid.Row="4" Grid.Column="0">
+                    <TextBlock Text="0" Style="{StaticResource MaterialDesignHeadline3TextBlock}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Grid>
+                <Grid Grid.Row="4" Grid.Column="1">
+                    <TextBlock Text="Total" Style="{StaticResource MaterialDesignHeadline3TextBlock}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Grid>
+                <Grid Grid.Row="4" Grid.Column="2">
+                    <TextBlock Text="0" Style="{StaticResource MaterialDesignHeadline3TextBlock}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Grid>
+            </Grid>
+        </Grid>
+        <!--<ContentControl prism:RegionManager.RegionName="ContentRegion" />-->
+    </Grid>
+</Window>
