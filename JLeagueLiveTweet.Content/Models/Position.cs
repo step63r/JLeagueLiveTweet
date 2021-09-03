@@ -1,9 +1,9 @@
-﻿namespace MinatoProject.Apps.JLeagueLiveTweet.Models
+﻿namespace MinatoProject.Apps.JLeagueLiveTweet.Content.Models
 {
     /// <summary>
     /// ポジション列挙型
     /// </summary>
-    public enum  Position
+    public enum Position
     {
         /// <summary>
         /// ゴールキーパー

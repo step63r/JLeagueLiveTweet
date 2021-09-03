@@ -1,7 +1,6 @@
 ﻿using MaterialDesignColors;
-using System.Windows.Media;
 
-namespace MinatoProject.Apps.JLeagueLiveTweet.Models
+namespace MinatoProject.Apps.JLeagueLiveTweet.Content.Models
 {
     /// <summary>
     /// クラブ

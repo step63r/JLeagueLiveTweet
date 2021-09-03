@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace MinatoProject.Apps.JLeagueLiveTweet.Models
+namespace MinatoProject.Apps.JLeagueLiveTweet.Content.Models
 {
     /// <summary>
     /// 都道府県

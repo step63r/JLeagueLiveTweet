@@ -1,4 +1,4 @@
-﻿namespace MinatoProject.Apps.JLeagueLiveTweet.Models
+﻿namespace MinatoProject.Apps.JLeagueLiveTweet.Content.Models
 {
     /// <summary>
     /// 選手データクラス
