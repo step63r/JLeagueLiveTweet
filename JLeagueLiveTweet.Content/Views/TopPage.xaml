@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels"
              xmlns:behavior="http://schemas.microsoft.com/xaml/behaviors"
              xmlns:interactivity="clr-namespace:Reactive.Bindings.Interactivity;assembly=ReactiveProperty.WPF"
              xmlns:prism="http://prismlibrary.com/"
@@ -10,6 +11,9 @@
              prism:ViewModelLocator.AutoWireViewModel="True"
              mc:Ignorable="d"
              d:DesignHeight="720" d:DesignWidth="960">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibleConverter" />
+    </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto" />
@@ -58,7 +62,8 @@
                     <TextBlock Text="{Binding CurrentDateTime, StringFormat=HH:mm:ss}" Style="{StaticResource MaterialDesignHeadline4TextBlock}" VerticalAlignment="Center" HorizontalAlignment="Center" />
                 </Grid>
                 <Grid Grid.Row="1" Margin="5">
-                    <TextBlock Text="45分計" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                    <!--<TextBlock Text="45分計" VerticalAlignment="Center" HorizontalAlignment="Center" />-->
+                    <TextBlock Text="{Binding QuarterTime, StringFormat={}{0:mm\\:ss}}" Style="{StaticResource MaterialDesignHeadline4TextBlock}" VerticalAlignment="Center" HorizontalAlignment="Center" />
                 </Grid>
             </Grid>
             <Grid Grid.Column="1">
@@ -85,34 +90,34 @@
                 </Grid>
 
                 <Grid Grid.Row="1" Grid.Column="0">
-                    <TextBlock Text="0" Style="{StaticResource MaterialDesignHeadline4TextBlock}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding Home1stScore}" Style="{StaticResource MaterialDesignHeadline4TextBlock}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Grid>
                 <Grid Grid.Row="1" Grid.Column="1">
                     <TextBlock Text="1st" Style="{StaticResource MaterialDesignHeadline4TextBlock}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Grid>
                 <Grid Grid.Row="1" Grid.Column="2">
-                    <TextBlock Text="0" Style="{StaticResource MaterialDesignHeadline4TextBlock}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding Away1stScore}" Style="{StaticResource MaterialDesignHeadline4TextBlock}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Grid>
 
                 <Grid Grid.Row="2" Grid.Column="0">
-                    <TextBlock Text="0" Style="{StaticResource MaterialDesignHeadline4TextBlock}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding Home2ndScore}" Visibility="{Binding SecondHalfVisibility, Converter={StaticResource BoolToVisibleConverter}}" Style="{StaticResource MaterialDesignHeadline4TextBlock}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Grid>
                 <Grid Grid.Row="2" Grid.Column="1">
                     <TextBlock Text="2nd" Style="{StaticResource MaterialDesignHeadline4TextBlock}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Grid>
                 <Grid Grid.Row="2" Grid.Column="2">
-                    <TextBlock Text="0" Style="{StaticResource MaterialDesignHeadline4TextBlock}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding Away2ndScore}" Visibility="{Binding SecondHalfVisibility, Converter={StaticResource BoolToVisibleConverter}}" Style="{StaticResource MaterialDesignHeadline4TextBlock}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Grid>
 
                 <Border Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" BorderThickness="1" BorderBrush="DarkGray" Margin="10 0 10 0" />
                 <Grid Grid.Row="4" Grid.Column="0">
-                    <TextBlock Text="0" Style="{StaticResource MaterialDesignHeadline3TextBlock}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding HomeTotalScore}" Style="{StaticResource MaterialDesignHeadline3TextBlock}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Grid>
                 <Grid Grid.Row="4" Grid.Column="1">
                     <TextBlock Text="Total" Style="{StaticResource MaterialDesignHeadline3TextBlock}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Grid>
                 <Grid Grid.Row="4" Grid.Column="2">
-                    <TextBlock Text="0" Style="{StaticResource MaterialDesignHeadline3TextBlock}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding AwayTotalScore}" Style="{StaticResource MaterialDesignHeadline3TextBlock}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Grid>
             </Grid>
         </Grid>
@@ -121,12 +126,25 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto" />
                 <RowDefinition Height="*" />
+                <RowDefinition Height="auto" />
             </Grid.RowDefinitions>
             <Grid Grid.Row="0" Margin="5">
                 <StackPanel Orientation="Horizontal">
-                    <Button Content="{Binding QuarterTimerCommandContent}" Command="{Binding QuarterTimerCommand}" Margin="0 0 10 0" />
-                    
+                    <Button Content="{Binding QuarterTimerCommandContent}" Command="{Binding QuarterTimerCommand}" MinWidth="100" Margin="0 0 10 0" />
+                    <ComboBox ItemsSource="{Binding AllPlayers}" DisplayMemberPath="Name" SelectedItem="{Binding SelectedPlayer}" MinWidth="150" Margin="0 0 10 0" />
+                    <Button Content="得点" Command="{Binding GetScoreCommand}" MinWidth="150" Margin="0 0 20 0" />
+                    <Button Content="失点" Style="{StaticResource MaterialDesignRaisedAccentButton}" Command="{Binding LostScoreCommand}" MinWidth="150" Margin="0 0 10 0" />
                 </StackPanel>
+            </Grid>
+            <Grid Grid.Row="1" Margin="5">
+                <TextBox Text="{Binding TweetContent}" TextWrapping="Wrap" VerticalAlignment="Stretch" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" SpellCheck.IsEnabled="True" materialDesign:HintAssist.Hint="input your tweet..." />
+            </Grid>
+            <Grid Grid.Row="2" Margin="5">
+                <Button Command="{Binding TweetCommand}" HorizontalAlignment="Right" Width="80">
+                    <Button.Content>
+                        <materialDesign:PackIcon Kind="Twitter" />
+                    </Button.Content>
+                </Button>
             </Grid>
         </Grid>
     </Grid>

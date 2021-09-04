@@ -1,11 +1,18 @@
-﻿using MaterialDesignColors;
+﻿using LinqToTwitter;
+using log4net;
+using MaterialDesignColors;
+using MinatoProject.Apps.JLeagueLiveTweet.Content.Extensions;
 using MinatoProject.Apps.JLeagueLiveTweet.Content.Models;
 using Prism.Commands;
 using Prism.Mvvm;
+using Prism.Services.Dialogs;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
+using System.Threading.Tasks;
 using System.Windows.Threading;
 
 namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
@@ -15,6 +22,25 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
     /// </summary>
     public class TopPageViewModel : BindableBase
     {
+        /// <summary>
+        /// ツイート種別
+        /// </summary>
+        private enum TweetType
+        {
+            /// <summary>
+            /// 状況
+            /// </summary>
+            Status,
+            /// <summary>
+            /// 得点
+            /// </summary>
+            GetScore,
+            /// <summary>
+            /// 失点
+            /// </summary>
+            LostScore
+        };
+
         #region プロパティ
         private Club _myClub;
         /// <summary>
@@ -136,6 +162,16 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
             set => _ = SetProperty(ref _away2ndScore, value);
         }
 
+        private bool _secondHalfVisibility = false;
+        /// <summary>
+        /// 後半のスコアを表示するか
+        /// </summary>
+        public bool SecondHalfVisibility
+        {
+            get => _secondHalfVisibility;
+            set => _ = SetProperty(ref _secondHalfVisibility, value);
+        }
+
         /// <summary>
         /// ホーム得点
         /// </summary>
@@ -156,7 +192,7 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
             set => _ = SetProperty(ref _currentDateTime, value);
         }
 
-        private TimeSpan _quarterTime;
+        private TimeSpan _quarterTime = new TimeSpan();
         /// <summary>
         /// 45分計
         /// </summary>
@@ -166,14 +202,61 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
             set => _ = SetProperty(ref _quarterTime, value);
         }
 
-        private string _quarterTimerCommandContent = string.Empty;
         /// <summary>
         /// 試合開始/前半終了/後半開始/試合終了コマンドの表示文字列
         /// </summary>
         public string QuarterTimerCommandContent
         {
-            get => _quarterTimerCommandContent;
-            set => _ = SetProperty(ref _quarterTimerCommandContent, value);
+            get
+            {
+                switch (GameProgress)
+                {
+                    case GameProgress.Before:
+                        return "試合開始";
+                    case GameProgress.FirstHalf:
+                        return "前半終了";
+                    case GameProgress.HalfTime:
+                        return "後半開始";
+                    case GameProgress.SecondHalf:
+                        return "試合終了";
+                    case GameProgress.After:
+                        return "リセット";
+                    default:
+                        throw new Exception($"The value of {nameof(GameProgress)} is invalid");
+                }
+            }
+        }
+
+        private GameProgress _gameProgress = GameProgress.Before;
+        /// <summary>
+        /// 試合経過
+        /// </summary>
+        public GameProgress GameProgress
+        {
+            get => _gameProgress;
+            set
+            {
+                SetProperty(ref _gameProgress, value);
+                RaisePropertyChanged(nameof(InGameProgress));
+                RaisePropertyChanged(nameof(QuarterTimerCommandContent));
+            }
+        }
+
+        /// <summary>
+        /// 試合中フラグ
+        /// </summary>
+        public bool InGameProgress => GameProgress != GameProgress.Before &&
+            GameProgress != GameProgress.HalfTime &&
+            GameProgress != GameProgress.After;
+
+        private string _tweetContent = string.Empty;
+        /// <summary>
+        /// ツイート内容
+        /// </summary>
+        public string TweetContent
+        {
+            get => _tweetContent;
+            set => _ = SetProperty(ref _tweetContent, value);
         }
         #endregion
 
@@ -198,9 +281,17 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
         /// 失点コマンド
         /// </summary>
         public DelegateCommand LostScoreCommand { get; private set; }
+        /// <summary>
+        /// ツイートコマンド
+        /// </summary>
+        public DelegateCommand TweetCommand { get; private set; }
         #endregion
 
         #region メンバ変数
+        /// <summary>
+        /// ロガー
+        /// </summary>
+        private static readonly ILog _logger = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
         /// <summary>
         /// 
         /// </summary>
@@ -214,18 +305,29 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
         /// </summary>
         private DispatcherTimer _quarterDispatcherTimer = new DispatcherTimer(DispatcherPriority.Normal);
         /// <summary>
-        /// 試合経過 (0: 開始前, 1: 前半, 2: ハーフタイム, 3: 後半, 4: 終了後)
+        /// 45分計の開始時刻
         /// </summary>
-        private int _gameProgress = 0;
+        private DateTime _quarterDispatcherTimerStartedAt;
+        /// <summary>
+        /// 
+        /// </summary>
+        private PinAuthorizer _pinAuthorizer;
+        /// <summary>
+        /// 
+        /// </summary>
+        private IDialogService _dialogService = null;
         #endregion
 
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        public TopPageViewModel()
+        /// <param name="dialogService"></param>
+        public TopPageViewModel(IDialogService dialogService)
         {
+            _dialogService = dialogService;
+
             _currentDispatcherTimer.Interval = new TimeSpan(0, 0, 1);
-            _currentDispatcherTimer.Tick += OnDispatcherTimerTicked;
+            _currentDispatcherTimer.Tick += OnCurrentDispatcherTimerTicked;
             _currentDispatcherTimer.Start();
 
             // 匿名関数版
@@ -310,10 +412,16 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
             HomeClubName = MyClub.Abbreviation;
 
             ClubChangedCommand = new DelegateCommand(ExecuteClubChangedCommand, CanExecuteClubChangedCommand);
+            ClubChangedCommand.ObservesProperty(() => SelectedClub);
             HomeAwayChangedCommand = new DelegateCommand(ExecuteHomeAwayChangedCommand, CanExecuteHomeAwayChangedCommand);
             QuarterTimerCommand = new DelegateCommand(ExecuteQuarterTimerCommand, CanExecuteQuarterTimerCommand);
             GetScoreCommand = new DelegateCommand(ExecuteGetScoreCommand, CanExecuteGetScoreCommand);
+            GetScoreCommand.ObservesProperty(() => SelectedPlayer);
+            GetScoreCommand.ObservesProperty(() => InGameProgress);
             LostScoreCommand = new DelegateCommand(ExecuteLostScoreCommand, CanExecuteLostScoreCommand);
+            LostScoreCommand.ObservesProperty(() => InGameProgress);
+            TweetCommand = new DelegateCommand(ExecuteTweetCommand, CanExecuteTweetCommand);
+            TweetCommand.ObservesProperty(() => TweetContent);
         }
 
         /// <summary>
@@ -325,7 +433,7 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
             {
                 _currentDispatcherTimer.Stop();
             }
-            _currentDispatcherTimer.Tick -= OnDispatcherTimerTicked;
+            _currentDispatcherTimer.Tick -= OnCurrentDispatcherTimerTicked;
         }
 
         /// <summary>
@@ -381,7 +489,45 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
         /// </summary>
         private void ExecuteQuarterTimerCommand()
         {
+            switch (GameProgress)
+            {
+                case GameProgress.Before:
+                    _quarterDispatcherTimer.Interval = new TimeSpan(0, 0, 1);
+                    _quarterDispatcherTimer.Tick += OnQuarterDispatcherTimerTicked;
+                    _quarterDispatcherTimerStartedAt = DateTime.Now;
+                    _quarterDispatcherTimer.Start();
+                    TweetContent = CreateTweetString(TweetType.Status);
+                    break;
 
+                case GameProgress.FirstHalf:
+                    _quarterDispatcherTimer.Stop();
+                    QuarterTime = new TimeSpan(0, 45, 0);
+                    TweetContent = CreateTweetString(TweetType.Status);
+                    break;
+
+                case GameProgress.HalfTime:
+                    SecondHalfVisibility = true;
+                    _quarterDispatcherTimer.Interval = new TimeSpan(0, 0, 1);
+                    _quarterDispatcherTimer.Tick += OnQuarterDispatcherTimerTicked;
+                    _quarterDispatcherTimerStartedAt = DateTime.Now;
+                    _quarterDispatcherTimer.Start();
+                    TweetContent = CreateTweetString(TweetType.Status);
+                    break;
+
+                case GameProgress.SecondHalf:
+                    _quarterDispatcherTimer.Stop();
+                    QuarterTime = new TimeSpan(0, 0, 0);
+                    TweetContent = CreateTweetString(TweetType.Status);
+                    break;
+
+                case GameProgress.After:
+                    // 特に処理なし
+                    break;
+
+                default:
+                    throw new Exception($"The value of {nameof(GameProgress)} is invalid");
+            }
+            GameProgress = GameProgress.Next();
         }
         /// <summary>
         /// 
@@ -397,7 +543,45 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
         /// </summary>
         private void ExecuteGetScoreCommand()
         {
+            // ホーム or アウェイ
+            if (IsMyClubAway)
+            {
+                // 前半 or 後半
+                if (GameProgress == GameProgress.FirstHalf)
+                {
+                    Away1stScore++;
+                }
+                else if (GameProgress == GameProgress.SecondHalf)
+                {
+                    Away2ndScore++;
+                }
+                else
+                {
+                    throw new InvalidOperationException();
+                }
 
+                RaisePropertyChanged(nameof(AwayTotalScore));
+            }
+            else
+            {
+                // 前半 or 後半
+                if (GameProgress == GameProgress.FirstHalf)
+                {
+                    Home1stScore++;
+                }
+                else if (GameProgress == GameProgress.SecondHalf)
+                {
+                    Home2ndScore++;
+                }
+                else
+                {
+                    throw new InvalidOperationException();
+                }
+
+                RaisePropertyChanged(nameof(HomeTotalScore));
+            }
+
+            TweetContent = CreateTweetString(TweetType.GetScore);
         }
         /// <summary>
         /// 
@@ -405,7 +589,7 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
         /// <returns></returns>
         private bool CanExecuteGetScoreCommand()
         {
-            return SelectedPlayer != null;
+            return InGameProgress && SelectedPlayer != null;
         }
 
         /// <summary>
@@ -413,7 +597,45 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
         /// </summary>
         private void ExecuteLostScoreCommand()
         {
+            // ホーム or アウェイ
+            if (IsMyClubAway)
+            {
+                // 前半 or 後半
+                if (GameProgress == GameProgress.FirstHalf)
+                {
+                    Home1stScore++;
+                }
+                else if (GameProgress == GameProgress.SecondHalf)
+                {
+                    Home2ndScore++;
+                }
+                else
+                {
+                    throw new InvalidOperationException();
+                }
 
+                RaisePropertyChanged(nameof(HomeTotalScore));
+            }
+            else
+            {
+                // 前半 or 後半
+                if (GameProgress == GameProgress.FirstHalf)
+                {
+                    Away1stScore++;
+                }
+                else if (GameProgress == GameProgress.SecondHalf)
+                {
+                    Away2ndScore++;
+                }
+                else
+                {
+                    throw new InvalidOperationException();
+                }
+
+                RaisePropertyChanged(nameof(AwayTotalScore));
+            }
+
+            TweetContent = CreateTweetString(TweetType.LostScore);
         }
         /// <summary>
         /// 
@@ -421,15 +643,114 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
         /// <returns></returns>
         private bool CanExecuteLostScoreCommand()
         {
-            return true;
+            return InGameProgress;
         }
 
         /// <summary>
         /// 
         /// </summary>
-        private void OnDispatcherTimerTicked(object sender, EventArgs e)
+        private async void ExecuteTweetCommand()
+        {
+            if (_pinAuthorizer == null)
+            {
+                _pinAuthorizer = await AuthorizeTwitter();
+            }
+
+            if (_pinAuthorizer == null)
+            {
+                return;
+            }
+
+            var context = new TwitterContext(_pinAuthorizer);
+            //_ = await context.TweetAsync(TweetContent);
+            _ = await context.TweetAsync("Hello! This is a test tweet from JLeagueLiveTweet!! Yeah!!!");
+
+            TweetContent = string.Empty;
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        private bool CanExecuteTweetCommand()
+        {
+            return !string.IsNullOrEmpty(TweetContent);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnCurrentDispatcherTimerTicked(object sender, EventArgs e)
         {
             CurrentDateTime = DateTime.Now;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnQuarterDispatcherTimerTicked(object sender, EventArgs e)
+        {
+            QuarterTime = DateTime.Now - _quarterDispatcherTimerStartedAt;
+        }
+
+        /// <summary>
+        /// ツイート内容を生成する
+        /// </summary>
+        /// <returns></returns>
+        private string CreateTweetString(TweetType tweetType)
+        {
+            string ret = string.Empty;
+            switch (tweetType)
+            {
+                case TweetType.Status:
+                    ret = $"{HomeClubName} {HomeTotalScore} {QuarterTimerCommandContent} {AwayTotalScore} {AwayClubName} {MyClub.HashTag}";
+                    break;
+
+                case TweetType.GetScore:
+                    ret = $"{HomeClubName} {HomeTotalScore} - {AwayTotalScore} {AwayClubName}" + Environment.NewLine +
+                        $"{QuarterTime.Minutes + 1}分 {SelectedPlayer.Name} {MyClub.HashTag}";
+                    break;
+
+                case TweetType.LostScore:
+                    ret = $"{HomeClubName} {HomeTotalScore} - {AwayTotalScore} {AwayClubName}";
+                    break;
+            }
+            return ret;
+        }
+
+        /// <summary>
+        /// Twitterのアカウント認証をする
+        /// </summary>
+        /// <returns></returns>
+        private async Task<PinAuthorizer> AuthorizeTwitter()
+        {
+            var dispatcher = Dispatcher.CurrentDispatcher;
+            var auth = new PinAuthorizer()
+            {
+                CredentialStore = new InMemoryCredentialStore
+                {
+                    ConsumerKey = Properties.Settings.Default.TwitterApiKey,
+                    ConsumerSecret = Properties.Settings.Default.TwitterApiSecret
+                },
+                GoToTwitterAuthorization = pageLink => Process.Start(pageLink),
+                GetPin = () =>
+                {
+                    var ret = new DialogResult();
+                    dispatcher.Invoke(() =>
+                    {
+                        _dialogService?.ShowDialog("InputPinCodeDialogView", null, r => ret = r as DialogResult);
+                    });
+                    return ret.Result == ButtonResult.OK ? ret.Parameters.GetValue<string>("PinCode") : string.Empty;
+                }
+            };
+
+            await auth.AuthorizeAsync();
+
+            var context = new TwitterContext(auth);
+            return context == null ? default : context.Authorizer as PinAuthorizer;
         }
     }
 }

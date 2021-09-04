@@ -1,4 +1,5 @@
-﻿using MinatoProject.Apps.JLeagueLiveTweet.Content.Views;
+﻿using MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels;
+using MinatoProject.Apps.JLeagueLiveTweet.Content.Views;
 using Prism.Ioc;
 using Prism.Modularity;
 using Prism.Regions;
@@ -23,7 +24,7 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content
         /// <param name="containerRegistry"></param>
         public void RegisterTypes(IContainerRegistry containerRegistry)
         {
-
+            containerRegistry.RegisterDialog<InputPinCodeDialogView, InputPinCodeDialogViewViewModel>();
         }
     }
 }
