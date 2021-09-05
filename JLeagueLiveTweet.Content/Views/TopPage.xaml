@@ -20,23 +20,12 @@
             <RowDefinition Height="3*" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        
+
         <Grid Grid.Row="0" Margin="5">
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="対戦相手" VerticalAlignment="Center" Margin="0 0 5 0" />
-                <ComboBox ItemsSource="{Binding AllClubs}" SelectedItem="{Binding SelectedClub}" DisplayMemberPath="Name" MinWidth="100" Margin="0 0 10 0">
-                    <behavior:Interaction.Triggers>
-                        <behavior:EventTrigger EventName="SelectionChanged">
-                            <interactivity:EventToReactiveCommand Command="{Binding ClubChangedCommand}" />
-                        </behavior:EventTrigger>
-                    </behavior:Interaction.Triggers>
-                </ComboBox>
+                <ComboBox ItemsSource="{Binding AllClubs}" SelectedItem="{Binding SelectedClub}" DisplayMemberPath="Name" MinWidth="100" Margin="0 0 10 0" />
                 <ToggleButton Style="{StaticResource MaterialDesignActionAccentToggleButton}" IsChecked="{Binding IsMyClubAway}">
-                    <behavior:Interaction.Triggers>
-                        <behavior:EventTrigger EventName="Click">
-                            <interactivity:EventToReactiveCommand Command="{Binding HomeAwayChangedCommand}" />
-                        </behavior:EventTrigger>
-                    </behavior:Interaction.Triggers>
                     <ToggleButton.Content>
                         <TextBlock Text="H" />
                     </ToggleButton.Content>
@@ -80,44 +69,44 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
                 <Grid Grid.Row="0" Grid.Column="0">
-                    <TextBlock Text="{Binding HomeClubName}" Style="{StaticResource MaterialDesignHeadline3TextBlock}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding ScoreBoard.HomeClub.Abbreviation}" Style="{StaticResource MaterialDesignHeadline3TextBlock}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Grid>
                 <Grid Grid.Row="0" Grid.Column="1">
                     <TextBlock Text="vs" Style="{StaticResource MaterialDesignHeadline3TextBlock}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Grid>
                 <Grid Grid.Row="0" Grid.Column="2">
-                    <TextBlock Text="{Binding AwayClubName}" Style="{StaticResource MaterialDesignHeadline3TextBlock}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding ScoreBoard.AwayClub.Abbreviation}" Style="{StaticResource MaterialDesignHeadline3TextBlock}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Grid>
 
                 <Grid Grid.Row="1" Grid.Column="0">
-                    <TextBlock Text="{Binding Home1stScore}" Style="{StaticResource MaterialDesignHeadline4TextBlock}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding ScoreBoard.Home1stScore}" Style="{StaticResource MaterialDesignHeadline4TextBlock}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Grid>
                 <Grid Grid.Row="1" Grid.Column="1">
                     <TextBlock Text="1st" Style="{StaticResource MaterialDesignHeadline4TextBlock}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Grid>
                 <Grid Grid.Row="1" Grid.Column="2">
-                    <TextBlock Text="{Binding Away1stScore}" Style="{StaticResource MaterialDesignHeadline4TextBlock}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding ScoreBoard.Away1stScore}" Style="{StaticResource MaterialDesignHeadline4TextBlock}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Grid>
 
                 <Grid Grid.Row="2" Grid.Column="0">
-                    <TextBlock Text="{Binding Home2ndScore}" Visibility="{Binding SecondHalfVisibility, Converter={StaticResource BoolToVisibleConverter}}" Style="{StaticResource MaterialDesignHeadline4TextBlock}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding ScoreBoard.Home2ndScore}" Visibility="{Binding SecondHalfVisibility, Converter={StaticResource BoolToVisibleConverter}}" Style="{StaticResource MaterialDesignHeadline4TextBlock}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Grid>
                 <Grid Grid.Row="2" Grid.Column="1">
                     <TextBlock Text="2nd" Style="{StaticResource MaterialDesignHeadline4TextBlock}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Grid>
                 <Grid Grid.Row="2" Grid.Column="2">
-                    <TextBlock Text="{Binding Away2ndScore}" Visibility="{Binding SecondHalfVisibility, Converter={StaticResource BoolToVisibleConverter}}" Style="{StaticResource MaterialDesignHeadline4TextBlock}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding ScoreBoard.Away2ndScore}" Visibility="{Binding SecondHalfVisibility, Converter={StaticResource BoolToVisibleConverter}}" Style="{StaticResource MaterialDesignHeadline4TextBlock}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Grid>
 
                 <Border Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" BorderThickness="1" BorderBrush="DarkGray" Margin="10 0 10 0" />
                 <Grid Grid.Row="4" Grid.Column="0">
-                    <TextBlock Text="{Binding HomeTotalScore}" Style="{StaticResource MaterialDesignHeadline3TextBlock}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding ScoreBoard.HomeTotalScore}" Style="{StaticResource MaterialDesignHeadline3TextBlock}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Grid>
                 <Grid Grid.Row="4" Grid.Column="1">
                     <TextBlock Text="Total" Style="{StaticResource MaterialDesignHeadline3TextBlock}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Grid>
                 <Grid Grid.Row="4" Grid.Column="2">
-                    <TextBlock Text="{Binding AwayTotalScore}" Style="{StaticResource MaterialDesignHeadline3TextBlock}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding ScoreBoard.AwayTotalScore}" Style="{StaticResource MaterialDesignHeadline3TextBlock}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Grid>
             </Grid>
         </Grid>
