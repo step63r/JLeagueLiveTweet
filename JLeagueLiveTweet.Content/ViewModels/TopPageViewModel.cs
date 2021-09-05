@@ -3,6 +3,8 @@ using log4net;
 using MaterialDesignColors;
 using MinatoProject.Apps.JLeagueLiveTweet.Content.Extensions;
 using MinatoProject.Apps.JLeagueLiveTweet.Content.Models;
+using MinatoProject.Apps.JLeagueLiveTweet.Core.Models;
+using MinatoProject.Apps.JLeagueLiveTweet.Core.Services;
 using Prism.Commands;
 using Prism.Mvvm;
 using Prism.Services.Dialogs;
@@ -248,9 +250,9 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
         /// </summary>
         private static readonly ILog _logger = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
         /// <summary>
-        /// 
+        /// クラブ情報をストアするインスタンス
         /// </summary>
-        private static readonly IEnumerable<Prefecture> Prefectures = Prefecture.GetPrefectures();
+        private ClubsStore _clubsStore = null;
         /// <summary>
         /// 現在時刻用のディスパッチャタイマー
         /// </summary>
@@ -283,40 +285,10 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
             _currentDispatcherTimer.Tick += OnCurrentDispatcherTimerTicked;
             _currentDispatcherTimer.Start();
 
-            // TODO: 全クラブを取得
-            AllClubs = new ObservableCollection<Club>()
-            {
-                new Club()
-                {
-                    Division = Division.J2,
-                    Name = "アルビレックス新潟",
-                    Abbreviation = "新潟",
-                    Prefecture = Prefectures.First(p => p.PrefCode == 15),
-                    PrimaryColor = PrimaryColor.DeepOrange,
-                    SecondaryColor = SecondaryColor.LightBlue,
-                    HashTag = "#albirex"
-                },
-                new Club()
-                {
-                    Division = Division.J2,
-                    Name = "ジュビロ磐田",
-                    Abbreviation = "磐田",
-                    Prefecture = Prefectures.First(p => p.PrefCode == 22),
-                    PrimaryColor = PrimaryColor.LightBlue,
-                    SecondaryColor = SecondaryColor.LightBlue,
-                    HashTag = "#jubilo"
-                },
-                new Club()
-                {
-                    Division = Division.J2,
-                    Name = "京都サンガF.C.",
-                    Abbreviation = "京都",
-                    Prefecture = Prefectures.First(p => p.PrefCode == 26),
-                    PrimaryColor = PrimaryColor.Purple,
-                    SecondaryColor = SecondaryColor.Purple,
-                    HashTag = "#sanga"
-                },
-            };
+            _clubsStore = ClubsStore.GetInstance();
+
+            // 全クラブを取得
+            AllClubs = new ObservableCollection<Club>(_clubsStore.GetClubs());
 
             // TODO: 自クラブを取得
             MyClub = AllClubs.First(p => p.Name.Equals("アルビレックス新潟"));
@@ -324,6 +296,9 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
 
             // 全クラブから自クラブを除外
             _ = AllClubs.Remove(MyClub);
+
+            // 全クラブから自クラブと同一ディビジョンのクラブを抽出
+            AllClubs = new ObservableCollection<Club>(AllClubs.Where(p => p.Division == MyClub.Division));
 
             // TODO: 自クラブの選手一覧を取得
             AllPlayers = new ObservableCollection<Player>()
@@ -363,7 +338,7 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
             // オウンゴールの人を作っておく
             AllPlayers.Add(new Player { Club = null, Number = -1, Name = "オウンゴール", Position = default });
 
-            // コマンドを設定
+            // コマンドの登録
             QuarterTimerCommand = new DelegateCommand(ExecuteQuarterTimerCommand, CanExecuteQuarterTimerCommand)
                 .ObservesProperty(() => InGameProgress)
                 .ObservesProperty(() => SelectedClub);

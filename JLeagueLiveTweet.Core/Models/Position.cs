@@ -1,4 +1,6 @@
-﻿namespace MinatoProject.Apps.JLeagueLiveTweet.Content.Models
+﻿using MinatoProject.Apps.JLeagueLiveTweet.Core.Extensions;
+
+namespace MinatoProject.Apps.JLeagueLiveTweet.Core.Models
 {
     /// <summary>
     /// ポジション列挙型

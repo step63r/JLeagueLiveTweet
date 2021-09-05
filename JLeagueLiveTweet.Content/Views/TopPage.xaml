@@ -126,14 +126,10 @@
                 </StackPanel>
             </Grid>
             <Grid Grid.Row="1" Margin="5">
-                <TextBox Text="{Binding TweetContent}" TextWrapping="Wrap" VerticalAlignment="Stretch" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" SpellCheck.IsEnabled="True" materialDesign:HintAssist.Hint="input your tweet..." />
+                <TextBox Text="{Binding TweetContent, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" VerticalAlignment="Stretch" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" SpellCheck.IsEnabled="True" materialDesign:HintAssist.Hint="input your tweet..." />
             </Grid>
             <Grid Grid.Row="2" Margin="5">
-                <Button Command="{Binding TweetCommand}" HorizontalAlignment="Right" Width="80">
-                    <Button.Content>
-                        <materialDesign:PackIcon Kind="Twitter" />
-                    </Button.Content>
-                </Button>
+                <Button Content="ツイートする" Command="{Binding TweetCommand}" HorizontalAlignment="Right" />
             </Grid>
         </Grid>
     </Grid>

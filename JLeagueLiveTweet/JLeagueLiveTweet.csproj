@@ -119,6 +119,10 @@
       <Project>{6515feff-2be5-42e3-adcf-9883b7287a5f}</Project>
       <Name>JLeagueLiveTweet.Content</Name>
     </ProjectReference>
+    <ProjectReference Include="..\JLeagueLiveTweet.Core\JLeagueLiveTweet.Core.csproj">
+      <Project>{33ef1029-3e38-417a-bee0-74aa750589c9}</Project>
+      <Name>JLeagueLiveTweet.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Models\" />

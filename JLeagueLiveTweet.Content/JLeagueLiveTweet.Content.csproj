@@ -53,12 +53,7 @@
     <Compile Include="Domain\TwitterPinCodeValidationRule.cs" />
     <Compile Include="Extensions\EnumExtension.cs" />
     <Compile Include="Behaviors\TraceBehavior.cs" />
-    <Compile Include="Models\Club.cs" />
-    <Compile Include="Models\Division.cs" />
     <Compile Include="Models\GameProgress.cs" />
-    <Compile Include="Models\Player.cs" />
-    <Compile Include="Models\Position.cs" />
-    <Compile Include="Models\Prefecture.cs" />
     <Compile Include="Models\ScoreBoard.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
@@ -73,10 +68,22 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Compile Include="ViewModels\ClubsPageViewModel.cs" />
     <Compile Include="ViewModels\InputPinCodeDialogViewViewModel.cs" />
+    <Compile Include="ViewModels\PlayersPageViewModel.cs" />
+    <Compile Include="ViewModels\SettingsPageViewModel.cs" />
     <Compile Include="ViewModels\TopPageViewModel.cs" />
+    <Compile Include="Views\ClubsPage.xaml.cs">
+      <DependentUpon>ClubsPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\InputPinCodeDialogView.xaml.cs">
       <DependentUpon>InputPinCodeDialogView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\PlayersPage.xaml.cs">
+      <DependentUpon>PlayersPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SettingsPage.xaml.cs">
+      <DependentUpon>SettingsPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\TopPage.xaml.cs">
       <DependentUpon>TopPage.xaml</DependentUpon>
@@ -92,7 +99,12 @@
     </None>
     <AppDesigner Include="Properties\" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\JLeagueLiveTweet.Core\JLeagueLiveTweet.Core.csproj">
+      <Project>{33ef1029-3e38-417a-bee0-74aa750589c9}</Project>
+      <Name>JLeagueLiveTweet.Core</Name>
+    </ProjectReference>
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="linqtotwitter">
       <Version>5.1.3</Version>
@@ -118,7 +130,19 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Views\ClubsPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\InputPinCodeDialogView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\PlayersPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\SettingsPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

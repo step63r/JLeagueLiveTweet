@@ -1,4 +1,5 @@
-﻿using Prism.Mvvm;
+﻿using MinatoProject.Apps.JLeagueLiveTweet.Core.Models;
+using Prism.Mvvm;
 
 namespace MinatoProject.Apps.JLeagueLiveTweet.Content.Models
 {
