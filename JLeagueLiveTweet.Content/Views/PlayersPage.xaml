@@ -9,6 +9,25 @@
              mc:Ignorable="d"
              d:DesignHeight="720" d:DesignWidth="960">
     <Grid Margin="5">
-            
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0" Margin="5">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="クラブ：" Margin="0 0 10 0" VerticalAlignment="Center" />
+                <ComboBox ItemsSource="{Binding Clubs}" DisplayMemberPath="Name" SelectedItem="{Binding SelectedClub}" MinWidth="100" Margin="0 0 10 0" />
+                <Button Content="このクラブの選手情報を取得する" Command="{Binding UpdatePlayersCommand}" />
+            </StackPanel>
+        </Grid>
+        <Grid Grid.Row="1" Margin="5">
+            <DataGrid ItemsSource="{Binding Players}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False">
+                <DataGrid.Columns>
+                    <materialDesign:DataGridTextColumn Header="背番号" Binding="{Binding Number}" />
+                    <materialDesign:DataGridTextColumn Header="ポジション" Binding="{Binding Position}" />
+                    <materialDesign:DataGridTextColumn Header="名前" Binding="{Binding Name}" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
     </Grid>
 </UserControl>

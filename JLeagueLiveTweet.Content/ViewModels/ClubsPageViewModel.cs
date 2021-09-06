@@ -21,7 +21,7 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
 
         #region メンバ変数
         /// <summary>
-        /// 
+        /// クラブ情報をストアするインスタンス
         /// </summary>
         private ClubsStore _clubsStore = ClubsStore.GetInstance();
         #endregion
