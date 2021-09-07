@@ -35,8 +35,8 @@
                     <StackPanel Orientation="Horizontal">
                         <ToggleButton Style="{DynamicResource MaterialDesignHamburgerToggleButton}" IsChecked="{Binding IsMenuOpened}" />
                         <StackPanel Orientation="Vertical">
-                            <TextBlock VerticalAlignment="Center" Margin="16 0 0 0" Style="{StaticResource MaterialDesignHeadline6TextBlock}">アルビレックス新潟</TextBlock>
-                            <TextBlock VerticalAlignment="Center" Margin="16 0 0 0" Style="{StaticResource MaterialDesignSubtitle2TextBlock}">明治安田生命 J2リーグ</TextBlock>
+                            <TextBlock Text="{Binding MyClubName}" VerticalAlignment="Center" Margin="16 0 0 0" Style="{StaticResource MaterialDesignHeadline6TextBlock}" />
+                            <TextBlock Text="{Binding MyClubDivision}" VerticalAlignment="Center" Margin="16 0 0 0" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" />
                         </StackPanel>
                     </StackPanel>
                 </materialDesign:ColorZone>

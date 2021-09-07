@@ -2,21 +2,19 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
-using System.Xml.Serialization;
 
 namespace MinatoProject.Apps.JLeagueLiveTweet.Core.Services
 {
     /// <summary>
     /// クラブ情報をストアするクラス
     /// </summary>
-    public sealed class ClubsStore
+    public sealed class ClubsStore : ServiceStoreBase
     {
         #region Singleton
         /// <summary>
         /// シングルトン インスタンス
         /// </summary>
-        private static ClubsStore _instance = new ClubsStore();
+        private static readonly ClubsStore _instance = new ClubsStore();
 
         /// <summary>
         /// インスタンスを取得する
@@ -52,7 +50,7 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Core.Services
         /// <summary>
         /// インスタンスを初期化する
         /// </summary>
-        public void InitializeInstance()
+        public override void InitializeInstance()
         {
             // ファイルが存在しない場合、新規作成
             if (!File.Exists(_clubsFilePath))
@@ -64,72 +62,42 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Core.Services
         }
 
         /// <summary>
-        /// 
+        /// クラブ一覧を取得する
         /// </summary>
-        /// <returns></returns>
+        /// <returns>クラブ一覧</returns>
         public IList<Club> GetClubs()
         {
             return _clubs;
         }
 
         /// <summary>
-        /// 
+        /// クラブを追加する
         /// </summary>
-        /// <param name="club"></param>
-        /// <returns></returns>
+        /// <param name="club">クラブ</param>
+        /// <returns>追加後のクラブ一覧</returns>
         public IList<Club> AddClub(Club club)
         {
             _clubs.Add(club);
+            Serialize(_clubs as List<Club>, _clubsFilePath);
             return _clubs;
         }
 
         /// <summary>
-        /// 
+        /// クラブを削除する
         /// </summary>
-        /// <param name="club"></param>
-        /// <returns></returns>
+        /// <param name="club">クラブ</param>
+        /// <returns>削除後のクラブ一覧</returns>
         public IList<Club> RemoveClub(Club club)
         {
-            _clubs.Remove(club);
+            _ = _clubs.Remove(club);
+            Serialize(_clubs as List<Club>, _clubsFilePath);
             return _clubs;
         }
 
         /// <summary>
-        /// 
+        /// クラブ一覧を初期化する (2021年現在)
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="obj"></param>
-        /// <param name="filePath"></param>
-        private static void Serialize<T>(T obj, string filePath) where T : class
-        {
-            var serializer = new XmlSerializer(typeof(T));
-            using (var sw = new StreamWriter(filePath, false, Encoding.UTF8))
-            {
-                serializer.Serialize(sw, obj);
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="filePath"></param>
-        /// <returns></returns>
-        private static T Deserialize<T>(string filePath) where T : class
-        {
-            var ret = default(T);
-            var serializer = new XmlSerializer(typeof(T));
-            using (var sr = new StreamReader(filePath, Encoding.UTF8))
-            {
-                ret = serializer.Deserialize(sr) as T;
-            }
-            return ret;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
+        /// <returns>クラブ一覧</returns>
         private static IList<Club> InitializeClubs()
         {
             return new List<Club>()

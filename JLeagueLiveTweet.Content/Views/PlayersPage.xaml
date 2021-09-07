@@ -8,26 +8,35 @@
              prism:ViewModelLocator.AutoWireViewModel="True"
              mc:Ignorable="d"
              d:DesignHeight="720" d:DesignWidth="960">
-    <Grid Margin="5">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="auto" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
-        <Grid Grid.Row="0" Margin="5">
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Text="クラブ：" Margin="0 0 10 0" VerticalAlignment="Center" />
-                <ComboBox ItemsSource="{Binding Clubs}" DisplayMemberPath="Name" SelectedItem="{Binding SelectedClub}" MinWidth="100" Margin="0 0 10 0" />
-                <Button Content="このクラブの選手情報を取得する" Command="{Binding UpdatePlayersCommand}" />
+    <materialDesign:DialogHost IsOpen="{Binding IsProgressing}">
+        <materialDesign:DialogHost.DialogContent>
+            <StackPanel Orientation="Vertical">
+                <TextBlock Text="選手情報を取得中" Margin="16" />
+                <ProgressBar Style="{DynamicResource MaterialDesignCircularProgressBar}" HorizontalAlignment="Center" Margin="16" IsIndeterminate="True" Value="0" />
             </StackPanel>
+        </materialDesign:DialogHost.DialogContent>
+        <Grid Margin="5">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0" Margin="5">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="クラブ：" Margin="0 0 10 0" VerticalAlignment="Center" />
+                    <ComboBox ItemsSource="{Binding Clubs}" DisplayMemberPath="Name" SelectedItem="{Binding SelectedClub}" MinWidth="200" Margin="0 0 10 0" />
+                    <Button Content="選手情報を取得" Command="{Binding UpdatePlayersCommand}" />
+                </StackPanel>
+            </Grid>
+            <Grid Grid.Row="1" Margin="5">
+                <DataGrid ItemsSource="{Binding Players}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False">
+                    <DataGrid.Columns>
+                        <materialDesign:DataGridTextColumn Header="背番号" Binding="{Binding Number}" />
+                        <materialDesign:DataGridTextColumn Header="ポジション" Binding="{Binding Position}" />
+                        <materialDesign:DataGridTextColumn Header="名前" Binding="{Binding Name}" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+            <materialDesign:Snackbar MessageQueue="{Binding MessageQueue}" Grid.Row="1" />
         </Grid>
-        <Grid Grid.Row="1" Margin="5">
-            <DataGrid ItemsSource="{Binding Players}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False">
-                <DataGrid.Columns>
-                    <materialDesign:DataGridTextColumn Header="背番号" Binding="{Binding Number}" />
-                    <materialDesign:DataGridTextColumn Header="ポジション" Binding="{Binding Position}" />
-                    <materialDesign:DataGridTextColumn Header="名前" Binding="{Binding Name}" />
-                </DataGrid.Columns>
-            </DataGrid>
-        </Grid>
-    </Grid>
+    </materialDesign:DialogHost>
 </UserControl>

@@ -11,9 +11,9 @@
              mc:Ignorable="d"
              d:DesignHeight="720" d:DesignWidth="960">
     <Grid Margin="5">
-        <DataGrid ItemsSource="{Binding Clubs}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True">
+        <DataGrid ItemsSource="{Binding Clubs}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False">
             <DataGrid.Columns>
-                <materialDesign:DataGridTextColumn Header="クラブ名" Binding="{Binding Name}" EditingElementStyle="{StaticResource MaterialDesignDataGridTextColumnPopupEditingStyle}" />
+                <materialDesign:DataGridTextColumn Header="クラブ名" Binding="{Binding Name}" IsReadOnly="True" />
                 <materialDesign:DataGridTextColumn Header="略称" Binding="{Binding Abbreviation}" EditingElementStyle="{StaticResource MaterialDesignDataGridTextColumnPopupEditingStyle}" />
                 <materialDesign:DataGridComboBoxColumn Header="ディビジョン" IsEditable="True" ItemsSourceBinding="{Binding Source={ext:EnumBindingSource EnumType={x:Type model:Division}}}" SelectedItemBinding="{Binding Division}" />
                 <materialDesign:DataGridComboBoxColumn Header="ホームタウン" IsEditable="True" ItemsSourceBinding="{Binding Source={ext:EnumBindingSource EnumType={x:Type model:Prefecture}}}" SelectedItemBinding="{Binding Prefecture}" />

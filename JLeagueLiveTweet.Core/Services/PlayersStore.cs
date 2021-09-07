@@ -2,21 +2,19 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
-using System.Xml.Serialization;
 
 namespace MinatoProject.Apps.JLeagueLiveTweet.Core.Services
 {
     /// <summary>
     /// 選手情報をストアするクラス
     /// </summary>
-    public class PlayersStore
+    public class PlayersStore : ServiceStoreBase
     {
         #region Singleton
         /// <summary>
         /// シングルトン インスタンス
         /// </summary>
-        private static PlayersStore _instance = new PlayersStore();
+        private static readonly PlayersStore _instance = new PlayersStore();
 
         /// <summary>
         /// インスタンスを取得する
@@ -30,13 +28,17 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Core.Services
 
         #region メンバ変数
         /// <summary>
+        /// クラブ情報をストアするインスタンス
+        /// </summary>
+        private readonly ClubsStore _clubsStore = ClubsStore.GetInstance();
+        /// <summary>
         /// 選手情報
         /// </summary>
-        private IList<Player> _players = new List<Player>();
+        private readonly IDictionary<string, IList<Player>> _players = new Dictionary<string, IList<Player>>();
         /// <summary>
         /// 選手情報ファイルパス
         /// </summary>
-        private static readonly string _playersFilePath = $@"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}\MinatoProject\Apps\JLeagueLiveTweet\players.xml";
+        private static readonly string _playersFilePath = $@"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}\MinatoProject\Apps\JLeagueLiveTweet";
         #endregion
 
         #region コンストラクタ
@@ -49,77 +51,78 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Core.Services
         /// <summary>
         /// インスタンスを初期化する
         /// </summary>
-        public void InitializeInstance()
+        public override void InitializeInstance()
         {
-            // ファイルが存在しない場合、新規作成
-            if (!File.Exists(_playersFilePath))
+            foreach (var club in _clubsStore.GetClubs())
             {
-                Serialize(_players as List<Player>, _playersFilePath);
-            }
-            _players = Deserialize<List<Player>>(_playersFilePath);
-        }
+                string filePath = GetClubFileName(club);
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        public IList<Player> GetPlayers()
-        {
-            return _players;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="club"></param>
-        /// <returns></returns>
-        public IList<Player> AddPlayer(Player player)
-        {
-            _players.Add(player);
-            return _players;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="club"></param>
-        /// <returns></returns>
-        public IList<Player> RemovePlayer(Player player)
-        {
-            _players.Remove(player);
-            return _players;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="obj"></param>
-        /// <param name="filePath"></param>
-        private static void Serialize<T>(T obj, string filePath) where T : class
-        {
-            var serializer = new XmlSerializer(typeof(T));
-            using (var sw = new StreamWriter(filePath, false, Encoding.UTF8))
-            {
-                serializer.Serialize(sw, obj);
+                // ファイルが存在しない場合、新規作成
+                if (!File.Exists(filePath))
+                {
+                    Serialize(new List<Player>(), filePath);
+                }
+                _players[club.Name] = Deserialize<List<Player>>(filePath);
             }
         }
 
         /// <summary>
-        /// 
+        /// 指定したクラブの選手情報一覧を取得する
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="filePath"></param>
-        /// <returns></returns>
-        private static T Deserialize<T>(string filePath) where T : class
+        /// <param name="club">クラブ</param>
+        /// <returns>選手情報</returns>
+        public IList<Player> GetPlayers(Club club)
         {
-            var ret = default(T);
-            var serializer = new XmlSerializer(typeof(T));
-            using (var sr = new StreamReader(filePath, Encoding.UTF8))
-            {
-                ret = serializer.Deserialize(sr) as T;
-            }
-            return ret;
+            return _players[club.Name];
+        }
+
+        /// <summary>
+        /// 指定したクラブの選手情報一覧を更新する
+        /// </summary>
+        /// <param name="club">クラブ</param>
+        /// <param name="players">選手情報一覧</param>
+        /// <returns>更新後の選手情報一覧</returns>
+        public IList<Player> SetPlayers(Club club, IList<Player> players)
+        {
+            _players[club.Name] = players;
+            Serialize(_players[club.Name] as List<Player>, GetClubFileName(club));
+            return _players[club.Name];
+        }
+
+        /// <summary>
+        /// 指定したクラブに選手情報を追加する
+        /// </summary>
+        /// <param name="club">クラブ</param>
+        /// <param name="player">選手情報</param>
+        /// <returns>追加後の選手情報一覧</returns>
+        public IList<Player> AddPlayer(Club club, Player player)
+        {
+            _players[club.Name].Add(player);
+            Serialize(_players[club.Name] as List<Player>, GetClubFileName(club));
+            return _players[club.Name];
+        }
+
+        /// <summary>
+        /// 指定したクラブから選手情報を削除する
+        /// </summary>
+        /// <param name="club">クラブ</param>
+        /// <param name="player">選手情報</param>
+        /// <returns>削除後の選手情報一覧</returns>
+        public IList<Player> RemovePlayer(Club club, Player player)
+        {
+            _ = _players[club.Name].Remove(player);
+            Serialize(_players[club.Name] as List<Player>, GetClubFileName(club));
+            return _players[club.Name];
+        }
+
+        /// <summary>
+        /// 指定したクラブの選手情報一覧ファイル名を取得する
+        /// </summary>
+        /// <param name="club">クラブ</param>
+        /// <returns>ファイル名</returns>
+        private string GetClubFileName(Club club)
+        {
+            return Path.Combine(_playersFilePath, $"{club.Name}.xml");
         }
         #endregion
     }

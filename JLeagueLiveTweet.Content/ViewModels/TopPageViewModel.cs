@@ -1,15 +1,14 @@
 ﻿using LinqToTwitter;
 using log4net;
-using MaterialDesignColors;
 using MinatoProject.Apps.JLeagueLiveTweet.Content.Extensions;
 using MinatoProject.Apps.JLeagueLiveTweet.Content.Models;
 using MinatoProject.Apps.JLeagueLiveTweet.Core.Models;
 using MinatoProject.Apps.JLeagueLiveTweet.Core.Services;
 using Prism.Commands;
+using Prism.Events;
 using Prism.Mvvm;
 using Prism.Services.Dialogs;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
@@ -242,6 +241,10 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
         /// IDialogService
         /// </summary>
         private readonly IDialogService _dialogService = null;
+        /// <summary>
+        /// IEventAggregator
+        /// </summary>
+        private readonly IEventAggregator _eventAggregator = null;
         #endregion
 
         #region メンバ変数
@@ -252,7 +255,15 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
         /// <summary>
         /// クラブ情報をストアするインスタンス
         /// </summary>
-        private ClubsStore _clubsStore = null;
+        private readonly ClubsStore _clubsStore = ClubsStore.GetInstance();
+        /// <summary>
+        /// 選手情報をストアするインスタンス
+        /// </summary>
+        private readonly PlayersStore _playersStore = PlayersStore.GetInstance();
+        /// <summary>
+        /// ユーザー設定情報をストアするインスタンス
+        /// </summary>
+        private readonly ConfigStore _configStore = ConfigStore.GetInstance();
         /// <summary>
         /// 現在時刻用のディスパッチャタイマー
         /// </summary>
@@ -274,69 +285,24 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        /// <param name="dialogService"></param>
-        public TopPageViewModel(IDialogService dialogService)
+        /// <param name="dialogService">IDialogService</param>
+        /// <param name="eventAggregator">IEventAggregator</param>
+        public TopPageViewModel(IDialogService dialogService, IEventAggregator eventAggregator)
         {
             // インターフェイスを取得
             _dialogService = dialogService;
+            _eventAggregator = eventAggregator;
 
             // 現在時刻用のディスパッチャタイマーを開始
             _currentDispatcherTimer.Interval = new TimeSpan(0, 0, 1);
             _currentDispatcherTimer.Tick += OnCurrentDispatcherTimerTicked;
             _currentDispatcherTimer.Start();
 
-            _clubsStore = ClubsStore.GetInstance();
-
             // 全クラブを取得
             AllClubs = new ObservableCollection<Club>(_clubsStore.GetClubs());
 
-            // TODO: 自クラブを取得
-            MyClub = AllClubs.First(p => p.Name.Equals("アルビレックス新潟"));
-            ScoreBoard.HomeClub = MyClub;
-
-            // 全クラブから自クラブを除外
-            _ = AllClubs.Remove(MyClub);
-
-            // 全クラブから自クラブと同一ディビジョンのクラブを抽出
-            AllClubs = new ObservableCollection<Club>(AllClubs.Where(p => p.Division == MyClub.Division));
-
-            // TODO: 自クラブの選手一覧を取得
-            AllPlayers = new ObservableCollection<Player>()
-            {
-                new Player() { Club = MyClub, Number = 1, Name = "小島 亨介", Position = Position.GK },
-                new Player() { Club = MyClub, Number = 21, Name = "阿部 航斗", Position = Position.GK },
-                new Player() { Club = MyClub, Number = 22, Name = "瀬口 拓弥", Position = Position.GK },
-                new Player() { Club = MyClub, Number = 41, Name = "藤田 和輝", Position = Position.GK },
-                new Player() { Club = MyClub, Number = 5, Name = "舞行龍ジェームズ", Position = Position.DF },
-                new Player() { Club = MyClub, Number = 19, Name = "星 雄次", Position = Position.DF },
-                new Player() { Club = MyClub, Number = 26, Name = "遠藤 凌", Position = Position.DF },
-                new Player() { Club = MyClub, Number = 28, Name = "早川 史哉", Position = Position.DF },
-                new Player() { Club = MyClub, Number = 30, Name = "丸山 嵩大", Position = Position.DF },
-                new Player() { Club = MyClub, Number = 31, Name = "堀米 悠斗", Position = Position.DF },
-                new Player() { Club = MyClub, Number = 32, Name = "長谷川 巧", Position = Position.DF },
-                new Player() { Club = MyClub, Number = 35, Name = "千葉 和彦", Position = Position.DF },
-                new Player() { Club = MyClub, Number = 50, Name = "田上 大地", Position = Position.DF },
-                new Player() { Club = MyClub, Number = 8, Name = "高 宇洋", Position = Position.MF },
-                new Player() { Club = MyClub, Number = 10, Name = "本間 至恩", Position = Position.MF },
-                new Player() { Club = MyClub, Number = 16, Name = "ゴンサロ ゴンザレス", Position = Position.MF },
-                new Player() { Club = MyClub, Number = 17, Name = "福田 晃斗", Position = Position.MF },
-                new Player() { Club = MyClub, Number = 20, Name = "島田 譲", Position = Position.MF },
-                new Player() { Club = MyClub, Number = 24, Name = "ロメロ フランク", Position = Position.MF },
-                new Player() { Club = MyClub, Number = 25, Name = "藤原 奏哉", Position = Position.MF },
-                new Player() { Club = MyClub, Number = 27, Name = "大本 祐槻", Position = Position.MF },
-                new Player() { Club = MyClub, Number = 33, Name = "高木 善朗", Position = Position.MF },
-                new Player() { Club = MyClub, Number = 37, Name = "三戸 舜介", Position = Position.MF },
-                new Player() { Club = MyClub, Number = 40, Name = "シマブク カズヨシ", Position = Position.MF },
-                new Player() { Club = MyClub, Number = 7, Name = "谷口 海斗", Position = Position.FW },
-                new Player() { Club = MyClub, Number = 9, Name = "鈴木 孝司", Position = Position.FW },
-                new Player() { Club = MyClub, Number = 11, Name = "髙澤 優也", Position = Position.FW },
-                new Player() { Club = MyClub, Number = 14, Name = "田中 達也", Position = Position.FW },
-                new Player() { Club = MyClub, Number = 23, Name = "小見 洋太", Position = Position.FW },
-                new Player() { Club = MyClub, Number = 39, Name = "矢村 健", Position = Position.FW },
-            };
-
-            // オウンゴールの人を作っておく
-            AllPlayers.Add(new Player { Club = null, Number = -1, Name = "オウンゴール", Position = default });
+            // 自クラブの情報を取得してUIを一括更新
+            UpdateMyClub(MyClub);
 
             // コマンドの登録
             QuarterTimerCommand = new DelegateCommand(ExecuteQuarterTimerCommand, CanExecuteQuarterTimerCommand)
@@ -349,6 +315,9 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
                 .ObservesProperty(() => InGameProgress);
             TweetCommand = new DelegateCommand(ExecuteTweetCommand, CanExecuteTweetCommand)
                 .ObservesProperty(() => TweetContent);
+
+            // イベントの登録
+            _ = _eventAggregator.GetEvent<PubSubEvent<Club>>().Subscribe(UpdateMyClub);
         }
 
         /// <summary>
@@ -656,6 +625,33 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
 
             var context = new TwitterContext(auth);
             return context == null ? default : context.Authorizer as PinAuthorizer;
+        }
+
+        /// <summary>
+        /// 他のViewModelからマイクラブ更新を受け取ったときのイベント
+        /// </summary>
+        /// <param name="club">クラブ</param>
+        private void UpdateMyClub(Club club)
+        {
+            // 自クラブを取得
+            MyClub = _configStore.GetConfig().MyClub ?? null;
+            if (MyClub != null)
+            {
+                ScoreBoard.HomeClub = MyClub;
+
+                // 全クラブから自クラブと同一ディビジョンのクラブを抽出
+                AllClubs = new ObservableCollection<Club>(_clubsStore.GetClubs().Where(p => p.Division == MyClub.Division));
+
+                // 自クラブを除外
+                _ = AllClubs.Remove(MyClub);
+
+                // 自クラブの選手一覧を取得
+                AllPlayers = new ObservableCollection<Player>(_playersStore.GetPlayers(MyClub))
+                {
+                    // オウンゴールの人を作っておく
+                    new Player { Club = null, Number = -1, Name = "オウンゴール", Position = default }
+                };
+            }
         }
     }
 }

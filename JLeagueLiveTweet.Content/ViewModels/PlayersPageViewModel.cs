@@ -1,4 +1,6 @@
-﻿using MinatoProject.Apps.JLeagueLiveTweet.Core.Models;
+﻿using MaterialDesignThemes.Wpf;
+using Microsoft.VisualBasic;
+using MinatoProject.Apps.JLeagueLiveTweet.Core.Models;
 using MinatoProject.Apps.JLeagueLiveTweet.Core.Services;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
@@ -10,6 +12,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
 {
@@ -77,29 +80,31 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
             }
         }
 
-        private ObservableCollection<Player> _players = new ObservableCollection<Player>();
         /// <summary>
         /// 選手一覧
         /// </summary>
-        public ObservableCollection<Player> Players
+        public ObservableCollection<Player> Players => _playersStore == null || _selectedClub == null
+                    ? new ObservableCollection<Player>()
+                    : new ObservableCollection<Player>(_playersStore.GetPlayers(_selectedClub));
+
+        private bool _isProgressing = false;
+        /// <summary>
+        /// 処理中フラグ
+        /// </summary>
+        public bool IsProgressing
         {
-            //get
-            //{
-            //    if (_playersStore == null)
-            //    {
-            //        return new ObservableCollection<Player>();
-            //    }
-            //    else if (_selectedClub == null)
-            //    {
-            //        return _allPlayers;
-            //    }
-            //    else
-            //    {
-            //        return new ObservableCollection<Player>(_allPlayers.Where(p => p.Club.Name.Equals(_selectedClub.Name)));
-            //    }
-            //}
-            get => _players;
-            set => _ = SetProperty(ref _players, value);
+            get => _isProgressing;
+            set => _ = SetProperty(ref _isProgressing, value);
+        }
+
+        private SnackbarMessageQueue _messageQueue = new SnackbarMessageQueue();
+        /// <summary>
+        /// スナックバーに表示するメッセージのキュー
+        /// </summary>
+        public SnackbarMessageQueue MessageQueue
+        {
+            get => _messageQueue;
+            set => _ = SetProperty(ref _messageQueue, value);
         }
         #endregion
 
@@ -114,15 +119,11 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
         /// <summary>
         /// クラブ情報をストアするインスタンス
         /// </summary>
-        private ClubsStore _clubsStore = ClubsStore.GetInstance();
+        private readonly ClubsStore _clubsStore = ClubsStore.GetInstance();
         /// <summary>
         /// 選手情報をストアするインスタンス
         /// </summary>
-        private PlayersStore _playersStore = PlayersStore.GetInstance();
-        /// <summary>
-        /// 全てのクラブの全ての選手一覧
-        /// </summary>
-        private ObservableCollection<Player> _allPlayers = new ObservableCollection<Player>();
+        private readonly PlayersStore _playersStore = PlayersStore.GetInstance();
         #endregion
 
         #region コンストラクタ
@@ -132,9 +133,7 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
         public PlayersPageViewModel()
         {
             Clubs = new ObservableCollection<Club>(_clubsStore.GetClubs());
-            _allPlayers = new ObservableCollection<Player>(_playersStore.GetPlayers());
-
-            UpdatePlayersCommand = new DelegateCommand(ExecuteUpdatePlayersCommand, CanExecuteUpdatePlayersCommand)
+            UpdatePlayersCommand = new DelegateCommand(async () => await ExecuteUpdatePlayersCommand(), CanExecuteUpdatePlayersCommand)
                 .ObservesProperty(() => SelectedClub);
         }
         #endregion
@@ -143,57 +142,91 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
         /// <summary>
         /// 選手情報更新コマンドを実行する
         /// </summary>
-        private void ExecuteUpdatePlayersCommand()
+        private async Task ExecuteUpdatePlayersCommand()
         {
-            string url = $@"{JLeagueDataSiteUrl}/SFIX02";
-
+            string snackbarMessage = string.Empty;
             var players = new ObservableCollection<Player>();
-            using (var driver = WebDriverFactory.CreateInstance(BrowserName.Chrome))
+            IsProgressing = true;
+            try
             {
-                driver.Url = url;
-
-                var divisionsElement = new SelectElement(driver.FindElement(By.XPath(XPath.DivisionsPulldown)));
-                divisionsElement.SelectByIndex((int)SelectedClub.Division + 1);
-
-                Thread.Sleep(1000);
-
-                var teamsElement = new SelectElement(driver.FindElement(By.XPath(XPath.TeamsPulldown)));
-                teamsElement.SelectByText(SelectedClub.Name);
-
-                Thread.Sleep(1000);
-
-                driver.FindElement(By.XPath(XPath.SearchButton)).Click();
-
-                int index = 3;
-                while (true)
+                await Task.Run(() =>
                 {
-                    try
+                    string url = $@"{JLeagueDataSiteUrl}/SFIX02";
+                    using (var driver = WebDriverFactory.CreateInstance(BrowserName.Chrome))
                     {
-                        string numberAndNameText = driver.FindElement(By.XPath(XPath.NumberAndNameText.Replace("PLAYER_ROW_NUM", index.ToString()))).Text;
-                        int number = int.Parse(Regex.Match(numberAndNameText, @"\d+").Value);
-                        string name = Regex.Match(numberAndNameText, @"[^ -~｡-ﾟ]+").Value;
-                        string positionText = driver.FindElement(By.XPath(XPath.PositionText.Replace("PLAYER_ROW_NUM", index.ToString()))).Text;
-                        Position position = (Position)Enum.Parse(typeof(Position), positionText);
-                        Console.WriteLine($"{number} {position} {name}");
+                        driver.Url = url;
 
-                        players.Add(new Player()
+                        var divisionsElement = new SelectElement(driver.FindElement(By.XPath(XPath.DivisionsPulldown)));
+                        divisionsElement.SelectByIndex((int)SelectedClub.Division + 1);
+
+                        Thread.Sleep(1000);
+
+                        var teamsElement = new SelectElement(driver.FindElement(By.XPath(XPath.TeamsPulldown)));
+                        try
                         {
-                            Club = SelectedClub,
-                            Number = number,
-                            Name = name,
-                            Position = position
-                        });
-                    }
-                    catch (NoSuchElementException)
-                    {
-                        Console.WriteLine("検索が終了しました");
-                        break;
-                    }
-                    index++;
-                }
-            }
+                            teamsElement.SelectByText(SelectedClub.Name);
+                        }
+                        catch (NoSuchElementException)
+                        {
+                            string teamNameWide = Strings.StrConv(SelectedClub.Name, VbStrConv.Wide, 0x411);
+                            Console.WriteLine($"全角で再検索：{teamNameWide}");
+                            teamsElement.SelectByText(teamNameWide);
+                        }
 
-            Players = players;
+                        Thread.Sleep(1000);
+
+                        driver.FindElement(By.XPath(XPath.SearchButton)).Click();
+
+                        int index = 3;
+                        while (true)
+                        {
+                            try
+                            {
+                                string numberAndNameText = driver.FindElement(By.XPath(XPath.NumberAndNameText.Replace("PLAYER_ROW_NUM", index.ToString()))).Text;
+                                bool numberParseResult = int.TryParse(Regex.Match(numberAndNameText, @"\d+").Value, out int number);
+                                if (!numberParseResult)
+                                {
+                                    Console.WriteLine($"番号登録なし（2種登録選手の可能性）: {numberAndNameText}");
+                                    index++;
+                                    continue;
+                                }
+                                string name = Regex.Match(numberAndNameText, @"[^ -~｡-ﾟ]+").Value;
+                                string positionText = driver.FindElement(By.XPath(XPath.PositionText.Replace("PLAYER_ROW_NUM", index.ToString()))).Text;
+                                var position = (Position)Enum.Parse(typeof(Position), positionText);
+                                Console.WriteLine($"{number} {position} {name}");
+
+                                players.Add(new Player()
+                                {
+                                    Club = SelectedClub,
+                                    Number = number,
+                                    Name = name,
+                                    Position = position
+                                });
+                            }
+                            catch (NoSuchElementException)
+                            {
+                                Console.WriteLine("検索が終了しました");
+                                break;
+                            }
+                            index++;
+                        }
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                snackbarMessage = "選手情報の取得に失敗しました";
+            }
+            IsProgressing = false;
+            _ = _playersStore.SetPlayers(SelectedClub, new List<Player>(players));
+            RaisePropertyChanged(nameof(Players));
+
+            if (string.IsNullOrEmpty(snackbarMessage))
+            {
+                snackbarMessage = "選手情報の取得が完了しました";
+            }
+            MessageQueue.Enqueue(snackbarMessage);
         }
         /// <summary>
         /// 選手情報更新コマンドが実行可能かどうかを判定する

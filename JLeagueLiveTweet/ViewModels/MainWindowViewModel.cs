@@ -1,5 +1,7 @@
-﻿using MinatoProject.Apps.JLeagueLiveTweet.Core.Services;
+﻿using MinatoProject.Apps.JLeagueLiveTweet.Core.Models;
+using MinatoProject.Apps.JLeagueLiveTweet.Core.Services;
 using Prism.Commands;
+using Prism.Events;
 using Prism.Mvvm;
 using Prism.Regions;
 
@@ -30,6 +32,29 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.ViewModels
             get => _isMenuOpened;
             set => _ = SetProperty(ref _isMenuOpened, value);
         }
+
+        private string _myClubName = string.Empty;
+        /// <summary>
+        /// マイクラブの名前
+        /// </summary>
+        public string MyClubName
+        {
+            get => _myClubName;
+            set => _ = SetProperty(ref _myClubName, value);
+        }
+
+        private string _myClubDivision = string.Empty;
+        /// <summary>
+        /// マイクラブの所属ディビジョン
+        /// </summary>
+        public string MyClubDivision
+        {
+            get => _myClubDivision;
+            set
+            {
+                _ = SetProperty(ref _myClubDivision, value);
+            }
+        }
         #endregion
 
         #region コマンド
@@ -56,26 +81,37 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.ViewModels
         /// IRegionManager
         /// </summary>
         private readonly IRegionManager _regionManager = null;
+        /// <summary>
+        /// IEventAggregator
+        /// </summary>
+        private readonly IEventAggregator _eventAggregator = null;
         #endregion
 
         #region メンバ変数
         /// <summary>
         /// クラブ情報をストアするインスタンス
         /// </summary>
-        private ClubsStore _clubsStore = ClubsStore.GetInstance();
+        private readonly ClubsStore _clubsStore = ClubsStore.GetInstance();
         /// <summary>
         /// 選手情報をストアするインスタンス
         /// </summary>
-        private PlayersStore _playersStore = PlayersStore.GetInstance();
+        private readonly PlayersStore _playersStore = PlayersStore.GetInstance();
+        /// <summary>
+        /// ユーザー設定情報をストアするインスタンス
+        /// </summary>
+        private readonly ConfigStore _configStore = ConfigStore.GetInstance();
         #endregion
 
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        public MainWindowViewModel(IRegionManager regionManager)
+        /// <param name="regionManager">IRegionManager</param>
+        /// <param name="eventAggregator">IEventAggregator</param>
+        public MainWindowViewModel(IRegionManager regionManager, IEventAggregator eventAggregator)
         {
             // インターフェイスの取得
             _regionManager = regionManager;
+            _eventAggregator = eventAggregator;
 
             // コマンドの登録
             ScoreBoardCommand = new DelegateCommand(ExecuteScoreBoardCommand);
@@ -86,6 +122,16 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.ViewModels
             // ストアを初期化
             _clubsStore.InitializeInstance();
             _playersStore.InitializeInstance();
+            _configStore.InitializeInstance();
+
+            var config = _configStore.GetConfig();
+            if (config.MyClub != null)
+            {
+                RefreshHeader(config.MyClub);
+            }
+
+            // イベントの登録
+            _eventAggregator.GetEvent<PubSubEvent<Club>>().Subscribe(RefreshHeader);
         }
 
         /// <summary>
@@ -122,6 +168,16 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.ViewModels
         {
             _regionManager.RequestNavigate("ContentRegion", "SettingsPage");
             IsMenuOpened = false;
+        }
+
+        /// <summary>
+        /// ヘッダを更新する
+        /// </summary>
+        /// <param name="club">マイクラブ</param>
+        private void RefreshHeader(Club club)
+        {
+            MyClubName = club.Name;
+            MyClubDivision = $"明治安田生命{club.Division}リーグ";
         }
     }
 }
