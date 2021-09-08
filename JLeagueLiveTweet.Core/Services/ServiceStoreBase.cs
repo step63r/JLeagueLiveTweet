@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using log4net;
+using System.IO;
+using System.Reflection;
 using System.Text;
 using System.Xml.Serialization;
 
@@ -9,6 +11,11 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Core.Services
     /// </summary>
     public abstract class ServiceStoreBase
     {
+        /// <summary>
+        /// ロガー
+        /// </summary>
+        protected readonly ILog _logger = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+
         /// <summary>
         /// インスタンスを初期化する
         /// </summary>

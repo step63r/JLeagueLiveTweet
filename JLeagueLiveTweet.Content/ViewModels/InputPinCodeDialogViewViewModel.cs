@@ -1,10 +1,9 @@
-﻿using Prism.Commands;
+﻿using log4net;
 using Prism.Mvvm;
 using Prism.Services.Dialogs;
 using Reactive.Bindings;
 using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Reflection;
 
 namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
 {
@@ -44,18 +43,29 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
         public event Action<IDialogResult> RequestClose;
         #endregion
 
+        #region メンバ変数
+        /// <summary>
+        /// ロガー
+        /// </summary>
+        private readonly ILog _logger = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        #endregion
+
         /// <summary>
         /// コンストラクタ
         /// </summary>
         public InputPinCodeDialogViewViewModel()
         {
+            _logger.Info("start");
             _ = AuthorizeCommand.Subscribe(() =>
             {
-                var param = new DialogParameters();
-                param.Add(nameof(PinCode), PinCode);
+                var param = new DialogParameters
+                {
+                    { nameof(PinCode), PinCode }
+                };
                 var ret = new DialogResult(ButtonResult.OK, param);
                 RequestClose?.Invoke(ret);
             });
+            _logger.Info("end");
         }
 
         /// <summary>
@@ -72,7 +82,9 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
         /// </summary>
         public void OnDialogClosed()
         {
-
+            _logger.Info("start");
+            _logger.Warn("Not implemented");
+            _logger.Info("end");
         }
 
         /// <summary>
@@ -81,7 +93,9 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
         /// <param name="parameters"></param>
         public void OnDialogOpened(IDialogParameters parameters)
         {
-
+            _logger.Info("start");
+            _logger.Warn("Not implemented");
+            _logger.Info("end");
         }
     }
 }

@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace MinatoProject.Apps.JLeagueLiveTweet.Properties {
+namespace MinatoProject.Apps.JLeagueLiveTweet.Core.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
@@ -25,61 +25,50 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Normal")]
-        public global::System.Windows.WindowState WindowState {
+        [global::System.Configuration.DefaultSettingValueAttribute("11223b4a-239b-45ae-a2de-3bb8603154bf")]
+        public global::System.Guid PrivateGuid {
             get {
-                return ((global::System.Windows.WindowState)(this["WindowState"]));
+                return ((global::System.Guid)(this["PrivateGuid"]));
             }
             set {
-                this["WindowState"] = value;
+                this["PrivateGuid"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("-1")]
-        public double Width {
+        [global::System.Configuration.DefaultSettingValueAttribute("rSlgVfctHz2wKr0nDn2jgYbbx")]
+        public string TwitterApiKey {
             get {
-                return ((double)(this["Width"]));
+                return ((string)(this["TwitterApiKey"]));
             }
             set {
-                this["Width"] = value;
+                this["TwitterApiKey"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("-1")]
-        public double Height {
+        [global::System.Configuration.DefaultSettingValueAttribute("6DEDeKLbpyuegSTRHQctVVA3KsLRCdFV1YBK2a6XWeteo58gKq")]
+        public string TwitterApiSecret {
             get {
-                return ((double)(this["Height"]));
+                return ((string)(this["TwitterApiSecret"]));
             }
             set {
-                this["Height"] = value;
+                this["TwitterApiSecret"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("-1")]
-        public double Top {
+        [global::System.Configuration.DefaultSettingValueAttribute("AAAAAAAAAAAAAAAAAAAAALh7TQEAAAAAc0qgl4pdwj3S3F7A9baf%2BwssLEs%3D8d3TL6JvK8BV48buQ" +
+            "0REn4Ydt2LjefNRWNhSbW9vzyALfOs3vP")]
+        public string TwitterBearerToken {
             get {
-                return ((double)(this["Top"]));
+                return ((string)(this["TwitterBearerToken"]));
             }
             set {
-                this["Top"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("-1")]
-        public double Left {
-            get {
-                return ((double)(this["Left"]));
-            }
-            set {
-                this["Left"] = value;
+                this["TwitterBearerToken"] = value;
             }
         }
     }

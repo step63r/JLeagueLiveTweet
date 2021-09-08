@@ -1,4 +1,5 @@
-﻿using MaterialDesignThemes.Wpf;
+﻿using log4net;
+using MaterialDesignThemes.Wpf;
 using Microsoft.VisualBasic;
 using MinatoProject.Apps.JLeagueLiveTweet.Core.Models;
 using MinatoProject.Apps.JLeagueLiveTweet.Core.Services;
@@ -10,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -117,6 +119,10 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
 
         #region メンバ変数
         /// <summary>
+        /// ロガー
+        /// </summary>
+        private readonly ILog _logger = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        /// <summary>
         /// クラブ情報をストアするインスタンス
         /// </summary>
         private readonly ClubsStore _clubsStore = ClubsStore.GetInstance();
@@ -132,9 +138,11 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
         /// </summary>
         public PlayersPageViewModel()
         {
+            _logger.Info("start");
             Clubs = new ObservableCollection<Club>(_clubsStore.GetClubs());
             UpdatePlayersCommand = new DelegateCommand(async () => await ExecuteUpdatePlayersCommand(), CanExecuteUpdatePlayersCommand)
                 .ObservesProperty(() => SelectedClub);
+            _logger.Info("end");
         }
         #endregion
 
@@ -144,6 +152,7 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
         /// </summary>
         private async Task ExecuteUpdatePlayersCommand()
         {
+            _logger.Info("start");
             string snackbarMessage = string.Empty;
             var players = new ObservableCollection<Player>();
             IsProgressing = true;
@@ -156,25 +165,31 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
                     {
                         driver.Url = url;
 
+                        _logger.Debug($"Select element: {XPath.DivisionsPulldown}");
                         var divisionsElement = new SelectElement(driver.FindElement(By.XPath(XPath.DivisionsPulldown)));
+
+                        _logger.Debug($"Select by index: {(int)SelectedClub.Division + 1}");
                         divisionsElement.SelectByIndex((int)SelectedClub.Division + 1);
 
                         Thread.Sleep(1000);
 
+                        _logger.Debug($"Select element: {XPath.TeamsPulldown}");
                         var teamsElement = new SelectElement(driver.FindElement(By.XPath(XPath.TeamsPulldown)));
                         try
                         {
+                            _logger.Debug($"Select by text: {SelectedClub.Name}");
                             teamsElement.SelectByText(SelectedClub.Name);
                         }
                         catch (NoSuchElementException)
                         {
                             string teamNameWide = Strings.StrConv(SelectedClub.Name, VbStrConv.Wide, 0x411);
-                            Console.WriteLine($"全角で再検索：{teamNameWide}");
+                            _logger.Warn($"Select by text: {teamNameWide}");
                             teamsElement.SelectByText(teamNameWide);
                         }
 
                         Thread.Sleep(1000);
 
+                        _logger.Debug($"Find element: {XPath.SearchButton}");
                         driver.FindElement(By.XPath(XPath.SearchButton)).Click();
 
                         int index = 3;
@@ -182,18 +197,22 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
                         {
                             try
                             {
+                                _logger.Debug($"Find element: {XPath.NumberAndNameText.Replace("PLAYER_ROW_NUM", index.ToString())}");
                                 string numberAndNameText = driver.FindElement(By.XPath(XPath.NumberAndNameText.Replace("PLAYER_ROW_NUM", index.ToString()))).Text;
                                 bool numberParseResult = int.TryParse(Regex.Match(numberAndNameText, @"\d+").Value, out int number);
                                 if (!numberParseResult)
                                 {
-                                    Console.WriteLine($"番号登録なし（2種登録選手の可能性）: {numberAndNameText}");
+                                    _logger.Warn($"No numbers found for {numberAndNameText}");
                                     index++;
                                     continue;
                                 }
                                 string name = Regex.Match(numberAndNameText, @"[^ -~｡-ﾟ]+").Value;
+
+                                _logger.Debug($"Find element: {XPath.PositionText.Replace("PLAYER_ROW_NUM", index.ToString())}");
                                 string positionText = driver.FindElement(By.XPath(XPath.PositionText.Replace("PLAYER_ROW_NUM", index.ToString()))).Text;
+
                                 var position = (Position)Enum.Parse(typeof(Position), positionText);
-                                Console.WriteLine($"{number} {position} {name}");
+                                _logger.Info($"{number} {position} {name}");
 
                                 players.Add(new Player()
                                 {
@@ -205,7 +224,7 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
                             }
                             catch (NoSuchElementException)
                             {
-                                Console.WriteLine("検索が終了しました");
+                                _logger.Info("Search finished");
                                 break;
                             }
                             index++;
@@ -215,7 +234,7 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                _logger.Error(ex.Message);
                 snackbarMessage = "選手情報の取得に失敗しました";
             }
             IsProgressing = false;
@@ -227,6 +246,7 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
                 snackbarMessage = "選手情報の取得が完了しました";
             }
             MessageQueue.Enqueue(snackbarMessage);
+            _logger.Info("end");
         }
         /// <summary>
         /// 選手情報更新コマンドが実行可能かどうかを判定する

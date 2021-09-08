@@ -55,4 +55,4 @@ using System.Windows;
 [assembly: AssemblyFileVersion("2021.09.08.01")]
 
 // log4net
-[assembly: log4net.Config.XmlConfigurator(Watch = true, ConfigFile = "log4net.config")]
+[assembly: log4net.Config.XmlConfigurator(Watch = true, ConfigFile = @"log4net.config")]

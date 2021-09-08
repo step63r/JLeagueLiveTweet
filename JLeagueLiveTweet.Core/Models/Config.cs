@@ -13,5 +13,17 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Core.Models
         /// </summary>
         [XmlElement]
         public Club MyClub { get; set; }
+
+        /// <summary>
+        /// Twitterのアクセストークン
+        /// </summary>
+        [XmlElement]
+        public string TwitterAccessToken { get; set; }
+
+        /// <summary>
+        /// Twitterのアクセストークンシークレット
+        /// </summary>
+        [XmlElement]
+        public string TwitterAccessTokenSecret { get; set; }
     }
 }

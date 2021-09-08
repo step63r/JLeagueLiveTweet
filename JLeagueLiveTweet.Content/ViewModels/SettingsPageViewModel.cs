@@ -1,9 +1,11 @@
-﻿using MinatoProject.Apps.JLeagueLiveTweet.Core.Models;
+﻿using log4net;
+using MinatoProject.Apps.JLeagueLiveTweet.Core.Models;
 using MinatoProject.Apps.JLeagueLiveTweet.Core.Services;
 using Prism.Events;
 using Prism.Mvvm;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reflection;
 
 namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
 {
@@ -51,6 +53,10 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
 
         #region メンバ変数
         /// <summary>
+        /// ロガー
+        /// </summary>
+        private readonly ILog _logger = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        /// <summary>
         /// クラブ情報をストアするインスタンス
         /// </summary>
         private readonly ClubsStore _clubsStore = ClubsStore.GetInstance();
@@ -67,6 +73,7 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
         /// <param name="eventAggregator">IEventAggregator</param>
         public SettingsPageViewModel(IEventAggregator eventAggregator)
         {
+            _logger.Info("start");
             _eventAggregator = eventAggregator;
 
             Clubs = new ObservableCollection<Club>(_clubsStore.GetClubs());
@@ -75,6 +82,7 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
             {
                 SelectedClub = Clubs.First(p => p.Name.Equals(_configStore.GetConfig().MyClub.Name));
             }
+            _logger.Info("end");
         }
         #endregion
     }

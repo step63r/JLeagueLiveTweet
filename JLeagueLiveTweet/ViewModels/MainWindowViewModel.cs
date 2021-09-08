@@ -1,9 +1,11 @@
-﻿using MinatoProject.Apps.JLeagueLiveTweet.Core.Models;
+﻿using log4net;
+using MinatoProject.Apps.JLeagueLiveTweet.Core.Models;
 using MinatoProject.Apps.JLeagueLiveTweet.Core.Services;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
 using Prism.Regions;
+using System.Reflection;
 
 namespace MinatoProject.Apps.JLeagueLiveTweet.ViewModels
 {
@@ -89,6 +91,10 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.ViewModels
 
         #region メンバ変数
         /// <summary>
+        /// ロガー
+        /// </summary>
+        private readonly ILog _logger = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        /// <summary>
         /// クラブ情報をストアするインスタンス
         /// </summary>
         private readonly ClubsStore _clubsStore = ClubsStore.GetInstance();
@@ -109,6 +115,7 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.ViewModels
         /// <param name="eventAggregator">IEventAggregator</param>
         public MainWindowViewModel(IRegionManager regionManager, IEventAggregator eventAggregator)
         {
+            _logger.Info("start");
             // インターフェイスの取得
             _regionManager = regionManager;
             _eventAggregator = eventAggregator;
@@ -132,6 +139,7 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.ViewModels
 
             // イベントの登録
             _eventAggregator.GetEvent<PubSubEvent<Club>>().Subscribe(RefreshHeader);
+            _logger.Info("end");
         }
 
         /// <summary>
@@ -139,8 +147,10 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.ViewModels
         /// </summary>
         private void ExecuteScoreBoardCommand()
         {
+            _logger.Info("start");
             _regionManager.RequestNavigate("ContentRegion", "TopPage");
             IsMenuOpened = false;
+            _logger.Info("end");
         }
 
         /// <summary>
@@ -148,8 +158,10 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.ViewModels
         /// </summary>
         private void ExecuteClubsCommand()
         {
+            _logger.Info("start");
             _regionManager.RequestNavigate("ContentRegion", "ClubsPage");
             IsMenuOpened = false;
+            _logger.Info("end");
         }
 
         /// <summary>
@@ -157,8 +169,10 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.ViewModels
         /// </summary>
         private void ExecutePlayersCommand()
         {
+            _logger.Info("start");
             _regionManager.RequestNavigate("ContentRegion", "PlayersPage");
             IsMenuOpened = false;
+            _logger.Info("end");
         }
 
         /// <summary>
@@ -166,8 +180,10 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.ViewModels
         /// </summary>
         private void ExecuteSettingsCommand()
         {
+            _logger.Info("start");
             _regionManager.RequestNavigate("ContentRegion", "SettingsPage");
             IsMenuOpened = false;
+            _logger.Info("end");
         }
 
         /// <summary>
@@ -176,8 +192,10 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.ViewModels
         /// <param name="club">マイクラブ</param>
         private void RefreshHeader(Club club)
         {
+            _logger.Info("start");
             MyClubName = club.Name;
             MyClubDivision = $"明治安田生命{club.Division}リーグ";
+            _logger.Info("end");
         }
     }
 }

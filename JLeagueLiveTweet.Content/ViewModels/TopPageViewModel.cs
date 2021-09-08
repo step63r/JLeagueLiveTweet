@@ -277,9 +277,9 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
         /// </summary>
         private DateTime _quarterDispatcherTimerStartedAt;
         /// <summary>
-        /// PinAuthorizer
+        /// IAuthorizer
         /// </summary>
-        private PinAuthorizer _pinAuthorizer;
+        private IAuthorizer _authorizer;
         #endregion
 
         /// <summary>
@@ -289,6 +289,7 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
         /// <param name="eventAggregator">IEventAggregator</param>
         public TopPageViewModel(IDialogService dialogService, IEventAggregator eventAggregator)
         {
+            _logger.Info("start");
             // インターフェイスを取得
             _dialogService = dialogService;
             _eventAggregator = eventAggregator;
@@ -318,6 +319,7 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
 
             // イベントの登録
             _ = _eventAggregator.GetEvent<PubSubEvent<Club>>().Subscribe(UpdateMyClub);
+            _logger.Info("end");
         }
 
         /// <summary>
@@ -325,11 +327,13 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
         /// </summary>
         ~TopPageViewModel()
         {
+            _logger.Info("start");
             if (_currentDispatcherTimer.IsEnabled)
             {
                 _currentDispatcherTimer.Stop();
             }
             _currentDispatcherTimer.Tick -= OnCurrentDispatcherTimerTicked;
+            _logger.Info("end");
         }
 
         /// <summary>
@@ -337,6 +341,7 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
         /// </summary>
         private void ExecuteQuarterTimerCommand()
         {
+            _logger.Info("start");
             switch (GameProgress)
             {
                 case GameProgress.Before:
@@ -381,6 +386,7 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
                     throw new Exception($"The value of {nameof(GameProgress)} is invalid");
             }
             GameProgress = GameProgress.Next();
+            _logger.Info("end");
         }
         /// <summary>
         /// 試合開始/前半終了/後半開始/試合終了コマンドが実行可能かどうかを判定する
@@ -406,7 +412,8 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
                     return !InGameProgress && SelectedClub != null;
 
                 default:
-                    throw new Exception($"The value of {nameof(GameProgress)} is invalid");
+                    _logger.Error($"The value of {nameof(GameProgress)} is invalid");
+                    return false;
             }
         }
 
@@ -415,6 +422,7 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
         /// </summary>
         private void ExecuteGetScoreCommand()
         {
+            _logger.Info("start");
             // ホーム or アウェイ
             if (IsMyClubAway)
             {
@@ -429,7 +437,8 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
                 }
                 else
                 {
-                    throw new InvalidOperationException();
+                    _logger.Error($"The value of {nameof(GameProgress)} is invalid");
+                    return;
                 }
 
                 RaisePropertyChanged(nameof(ScoreBoard.AwayTotalScore));
@@ -447,13 +456,15 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
                 }
                 else
                 {
-                    throw new InvalidOperationException();
+                    _logger.Error($"The value of {nameof(GameProgress)} is invalid");
+                    return;
                 }
 
                 RaisePropertyChanged(nameof(ScoreBoard.HomeTotalScore));
             }
 
             TweetContent = CreateTweetString(TweetType.GetScore);
+            _logger.Info("end");
         }
         /// <summary>
         /// 得点コマンドが実行可能かどうかを判定する
@@ -469,6 +480,7 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
         /// </summary>
         private void ExecuteLostScoreCommand()
         {
+            _logger.Info("start");
             // ホーム or アウェイ
             if (IsMyClubAway)
             {
@@ -483,7 +495,8 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
                 }
                 else
                 {
-                    throw new InvalidOperationException();
+                    _logger.Error($"The value of {nameof(GameProgress)} is invalid");
+                    return;
                 }
 
                 RaisePropertyChanged(nameof(ScoreBoard.HomeTotalScore));
@@ -501,13 +514,15 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
                 }
                 else
                 {
-                    throw new InvalidOperationException();
+                    _logger.Error($"The value of {nameof(GameProgress)} is invalid");
+                    return;
                 }
 
                 RaisePropertyChanged(nameof(ScoreBoard.AwayTotalScore));
             }
 
             TweetContent = CreateTweetString(TweetType.LostScore);
+            _logger.Info("end");
         }
         /// <summary>
         /// 失点コマンドが実行可能かどうかを判定する
@@ -523,20 +538,32 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
         /// </summary>
         private async void ExecuteTweetCommand()
         {
-            if (_pinAuthorizer == null)
-            {
-                _pinAuthorizer = await AuthorizeTwitter();
-            }
+            _logger.Info("start");
+            _authorizer = await AuthorizeTwitter();
 
-            if (_pinAuthorizer == null)
+            if (_authorizer == null)
             {
+                _logger.Error("Failed to authorize Twitter account");
+                _logger.Info("  ==> Clear current access token and secret. Try again.");
+                _configStore.SetTwitterAccessToken(string.Empty);
+                _configStore.SetTwitterAccessTokenSecret(string.Empty);
                 return;
             }
 
-            var context = new TwitterContext(_pinAuthorizer);
-            _ = await context.TweetAsync(TweetContent);
+            if (_authorizer is PinAuthorizer pinAuth)
+            {
+                _logger.Info("Success to pin authorize Twitter account");
+                _logger.Info(" ==> Save access token and secret.");
+                _configStore.SetTwitterAccessToken(pinAuth.CredentialStore.OAuthToken);
+                _configStore.SetTwitterAccessTokenSecret(pinAuth.CredentialStore.OAuthTokenSecret);
+            }
+
+            var context = new TwitterContext(_authorizer);
+            var response = await context.TweetAsync(TweetContent);
+            _logger.Info($"Status: {response?.StatusID}");
 
             TweetContent = string.Empty;
+            _logger.Info("end");
         }
         /// <summary>
         /// ツイートコマンドが実行可能かどうかを判定する
@@ -574,7 +601,8 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
         /// <returns></returns>
         private string CreateTweetString(TweetType tweetType)
         {
-            string ret;
+            _logger.Info("start");
+            string ret = string.Empty;
             switch (tweetType)
             {
                 case TweetType.Status:
@@ -590,8 +618,10 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
                     ret = $"{ScoreBoard.HomeClub.Abbreviation} {ScoreBoard.HomeTotalScore} - {ScoreBoard.AwayTotalScore} {ScoreBoard.AwayClub.Abbreviation}";
                     break;
                 default:
-                    throw new Exception($"The value of {nameof(tweetType)} is invalid");
+                    _logger.Error($"The value of {nameof(tweetType)} is invalid");
+                    break;
             }
+            _logger.Info($"end [{ret}]");
             return ret;
         }
 
@@ -599,32 +629,63 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
         /// Twitterのアカウント認証をする
         /// </summary>
         /// <returns></returns>
-        private async Task<PinAuthorizer> AuthorizeTwitter()
+        private async Task<IAuthorizer> AuthorizeTwitter()
         {
-            var dispatcher = Dispatcher.CurrentDispatcher;
-            var auth = new PinAuthorizer()
-            {
-                CredentialStore = new InMemoryCredentialStore
-                {
-                    ConsumerKey = Properties.Settings.Default.TwitterApiKey,
-                    ConsumerSecret = Properties.Settings.Default.TwitterApiSecret
-                },
-                GoToTwitterAuthorization = pageLink => Process.Start(pageLink),
-                GetPin = () =>
-                {
-                    var ret = new DialogResult();
-                    dispatcher.Invoke(() =>
-                    {
-                        _dialogService?.ShowDialog("InputPinCodeDialogView", null, r => ret = r as DialogResult);
-                    });
-                    return ret.Result == ButtonResult.OK ? ret.Parameters.GetValue<string>("PinCode") : string.Empty;
-                }
-            };
+            _logger.Info("start");
+            IAuthorizer auth;
 
-            await auth.AuthorizeAsync();
+            var dispatcher = Dispatcher.CurrentDispatcher;
+
+            string accessToken = _configStore.GetTwitterAccessToken();
+            string accessTokenSecret = _configStore.GetTwitterAccessTokenSecret();
+
+            if (string.IsNullOrEmpty(accessToken) || string.IsNullOrEmpty(accessTokenSecret))
+            {
+                auth = new PinAuthorizer()
+                {
+                    CredentialStore = new InMemoryCredentialStore
+                    {
+                        ConsumerKey = _configStore.GetTwitterApiKey(),
+                        ConsumerSecret = _configStore.GetTwitterApiSecret()
+                    },
+                    GoToTwitterAuthorization = pageLink => Process.Start(pageLink),
+                    GetPin = () =>
+                    {
+                        var ret = new DialogResult();
+                        dispatcher.Invoke(() =>
+                        {
+                            _dialogService?.ShowDialog("InputPinCodeDialogView", null, r => ret = r as DialogResult);
+                        });
+                        return ret.Result == ButtonResult.OK ? ret.Parameters.GetValue<string>("PinCode") : string.Empty;
+                    }
+                };
+            }
+            else
+            {
+                auth = new SingleUserAuthorizer()
+                {
+                    CredentialStore = new SingleUserInMemoryCredentialStore()
+                    {
+                        ConsumerKey = _configStore.GetTwitterApiKey(),
+                        ConsumerSecret = _configStore.GetTwitterApiSecret(),
+                        AccessToken = accessToken,
+                        AccessTokenSecret = accessTokenSecret
+                    }
+                };
+            }
+
+            try
+            {
+                await auth.AuthorizeAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex.Message);
+            }
 
             var context = new TwitterContext(auth);
-            return context == null ? default : context.Authorizer as PinAuthorizer;
+            _logger.Info("end");
+            return context == null ? default : context.Authorizer;
         }
 
         /// <summary>
@@ -633,6 +694,7 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
         /// <param name="club">クラブ</param>
         private void UpdateMyClub(Club club)
         {
+            _logger.Info("start");
             // 自クラブを取得
             MyClub = _configStore.GetConfig().MyClub ?? null;
             if (MyClub != null)
@@ -652,6 +714,7 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
                     new Player { Club = null, Number = -1, Name = "オウンゴール", Position = default }
                 };
             }
+            _logger.Info("end");
         }
     }
 }

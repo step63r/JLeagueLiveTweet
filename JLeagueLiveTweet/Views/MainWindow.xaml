@@ -13,7 +13,8 @@
         TextOptions.TextRenderingMode="Auto"
         Background="{DynamicResource MaterialDesignPaper}"
         FontFamily="{DynamicResource MaterialDesignFont}"
-        Title="{Binding Title}" Height="720" Width="960">
+        Title="{Binding Title}" Height="720" Width="960"
+        Closing="Window_Closing">
     <materialDesign:DrawerHost IsLeftDrawerOpen="{Binding IsMenuOpened}">
         <materialDesign:DrawerHost.LeftDrawerContent>
             <StackPanel Margin="16" MinWidth="160">

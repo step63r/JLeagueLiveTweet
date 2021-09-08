@@ -1,7 +1,9 @@
-﻿using MinatoProject.Apps.JLeagueLiveTweet.Core.Models;
+﻿using log4net;
+using MinatoProject.Apps.JLeagueLiveTweet.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 
 namespace MinatoProject.Apps.JLeagueLiveTweet.Core.Services
 {
@@ -53,6 +55,7 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Core.Services
         /// </summary>
         public override void InitializeInstance()
         {
+            _logger.Info("start");
             foreach (var club in _clubsStore.GetClubs())
             {
                 string filePath = GetClubFileName(club);
@@ -64,6 +67,7 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Core.Services
                 }
                 _players[club.Name] = Deserialize<List<Player>>(filePath);
             }
+            _logger.Info("end");
         }
 
         /// <summary>
@@ -73,6 +77,8 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Core.Services
         /// <returns>選手情報</returns>
         public IList<Player> GetPlayers(Club club)
         {
+            _logger.Info("start");
+            _logger.Info("end");
             return _players[club.Name];
         }
 
@@ -84,8 +90,10 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Core.Services
         /// <returns>更新後の選手情報一覧</returns>
         public IList<Player> SetPlayers(Club club, IList<Player> players)
         {
+            _logger.Info("start");
             _players[club.Name] = players;
             Serialize(_players[club.Name] as List<Player>, GetClubFileName(club));
+            _logger.Info("end");
             return _players[club.Name];
         }
 
@@ -97,8 +105,10 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Core.Services
         /// <returns>追加後の選手情報一覧</returns>
         public IList<Player> AddPlayer(Club club, Player player)
         {
+            _logger.Info("start");
             _players[club.Name].Add(player);
             Serialize(_players[club.Name] as List<Player>, GetClubFileName(club));
+            _logger.Info("end");
             return _players[club.Name];
         }
 
@@ -110,8 +120,10 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Core.Services
         /// <returns>削除後の選手情報一覧</returns>
         public IList<Player> RemovePlayer(Club club, Player player)
         {
+            _logger.Info("start");
             _ = _players[club.Name].Remove(player);
             Serialize(_players[club.Name] as List<Player>, GetClubFileName(club));
+            _logger.Info("end");
             return _players[club.Name];
         }
 

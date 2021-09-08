@@ -15,12 +15,12 @@ namespace MinatoProject.Apps.JLeagueLiveTweet
     public partial class App
     {
         /// <summary>
-        /// 
+        /// 設定ファイルフォルダパス
         /// </summary>
         private static readonly string _settingsPath = $@"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}\MinatoProject\Apps\JLeagueLiveTweet";
 
         /// <summary>
-        /// 
+        /// CreateShell
         /// </summary>
         /// <returns></returns>
         protected override Window CreateShell()
@@ -34,9 +34,9 @@ namespace MinatoProject.Apps.JLeagueLiveTweet
         }
 
         /// <summary>
-        /// 
+        /// RegisterTypes
         /// </summary>
-        /// <param name="containerRegistry"></param>
+        /// <param name="containerRegistry">IContainerRegistry</param>
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
             containerRegistry.RegisterForNavigation<TopPage>();
@@ -46,9 +46,9 @@ namespace MinatoProject.Apps.JLeagueLiveTweet
         }
 
         /// <summary>
-        /// 
+        /// ConfigureModuleCatalog
         /// </summary>
-        /// <param name="moduleCatalog"></param>
+        /// <param name="moduleCatalog">IModuleCatalog</param>
         protected override void ConfigureModuleCatalog(IModuleCatalog moduleCatalog)
         {
             // モジュールの登録

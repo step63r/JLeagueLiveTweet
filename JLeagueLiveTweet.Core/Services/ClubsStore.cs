@@ -1,7 +1,9 @@
-﻿using MinatoProject.Apps.JLeagueLiveTweet.Core.Models;
+﻿using log4net;
+using MinatoProject.Apps.JLeagueLiveTweet.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 
 namespace MinatoProject.Apps.JLeagueLiveTweet.Core.Services
 {
@@ -52,6 +54,7 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Core.Services
         /// </summary>
         public override void InitializeInstance()
         {
+            _logger.Info("start");
             // ファイルが存在しない場合、新規作成
             if (!File.Exists(_clubsFilePath))
             {
@@ -59,6 +62,7 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Core.Services
                 Serialize(_clubs as List<Club>, _clubsFilePath);
             }
             _clubs = Deserialize<List<Club>>(_clubsFilePath);
+            _logger.Info("end");
         }
 
         /// <summary>
@@ -67,6 +71,8 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Core.Services
         /// <returns>クラブ一覧</returns>
         public IList<Club> GetClubs()
         {
+            _logger.Info("start");
+            _logger.Info("end");
             return _clubs;
         }
 
@@ -77,8 +83,10 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Core.Services
         /// <returns>追加後のクラブ一覧</returns>
         public IList<Club> AddClub(Club club)
         {
+            _logger.Info("start");
             _clubs.Add(club);
             Serialize(_clubs as List<Club>, _clubsFilePath);
+            _logger.Info("end");
             return _clubs;
         }
 
@@ -89,8 +97,10 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Core.Services
         /// <returns>削除後のクラブ一覧</returns>
         public IList<Club> RemoveClub(Club club)
         {
+            _logger.Info("start");
             _ = _clubs.Remove(club);
             Serialize(_clubs as List<Club>, _clubsFilePath);
+            _logger.Info("end");
             return _clubs;
         }
 

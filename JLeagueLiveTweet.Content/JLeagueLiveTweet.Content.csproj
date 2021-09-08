@@ -53,7 +53,6 @@
     <Compile Include="ContentModule.cs" />
     <Compile Include="Domain\TwitterPinCodeValidationRule.cs" />
     <Compile Include="Extensions\EnumExtension.cs" />
-    <Compile Include="Behaviors\TraceBehavior.cs" />
     <Compile Include="Models\GameProgress.cs" />
     <Compile Include="Models\ScoreBoard.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">

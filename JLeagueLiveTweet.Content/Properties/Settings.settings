@@ -1,21 +1,5 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="MinatoProject.Apps.JLeagueLiveTweet.Content.Properties" GeneratedClassName="Settings">
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)">
   <Profiles />
-  <Settings>
-    <Setting Name="TwitterApiKey" Type="System.String" Scope="User">
-      <Value Profile="(Default)">rSlgVfctHz2wKr0nDn2jgYbbx</Value>
-    </Setting>
-    <Setting Name="TwitterApiSecret" Type="System.String" Scope="User">
-      <Value Profile="(Default)">6DEDeKLbpyuegSTRHQctVVA3KsLRCdFV1YBK2a6XWeteo58gKq</Value>
-    </Setting>
-    <Setting Name="TwitterBearerToken" Type="System.String" Scope="User">
-      <Value Profile="(Default)">AAAAAAAAAAAAAAAAAAAAALh7TQEAAAAAc0qgl4pdwj3S3F7A9baf%2BwssLEs%3D8d3TL6JvK8BV48buQ0REn4Ydt2LjefNRWNhSbW9vzyALfOs3vP</Value>
-    </Setting>
-    <Setting Name="AccessToken" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
-    </Setting>
-    <Setting Name="AccessTokenSecret" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
-    </Setting>
-  </Settings>
+  <Settings />
 </SettingsFile>

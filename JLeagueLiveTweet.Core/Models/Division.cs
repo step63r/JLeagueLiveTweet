@@ -1,5 +1,4 @@
-﻿using MinatoProject.Apps.JLeagueLiveTweet.Core.Extensions;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 
 namespace MinatoProject.Apps.JLeagueLiveTweet.Core.Models
 {
