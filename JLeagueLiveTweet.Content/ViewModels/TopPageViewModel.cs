@@ -1,5 +1,6 @@
 ﻿using LinqToTwitter;
 using log4net;
+using MaterialDesignThemes.Wpf;
 using MinatoProject.Apps.JLeagueLiveTweet.Content.Extensions;
 using MinatoProject.Apps.JLeagueLiveTweet.Content.Models;
 using MinatoProject.Apps.JLeagueLiveTweet.Core.Models;
@@ -213,6 +214,16 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
         {
             get => _tweetContent;
             set => _ = SetProperty(ref _tweetContent, value);
+        }
+
+        private SnackbarMessageQueue _messageQueue = new SnackbarMessageQueue();
+        /// <summary>
+        /// スナックバーに表示するメッセージのキュー
+        /// </summary>
+        public SnackbarMessageQueue MessageQueue
+        {
+            get => _messageQueue;
+            set => _ = SetProperty(ref _messageQueue, value);
         }
         #endregion
 
@@ -547,6 +558,8 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
                 _logger.Info("  ==> Clear current access token and secret. Try again.");
                 _configStore.SetTwitterAccessToken(string.Empty);
                 _configStore.SetTwitterAccessTokenSecret(string.Empty);
+
+                MessageQueue.Enqueue("アカウント認証に失敗しました");
                 return;
             }
 
@@ -560,9 +573,15 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
 
             var context = new TwitterContext(_authorizer);
             var response = await context.TweetAsync(TweetContent);
-            _logger.Info($"Status: {response?.StatusID}");
+            if (response == null)
+            {
+                _logger.Error("Failed to tweet");
+                MessageQueue.Enqueue("ツイートに失敗しました");
+                return;
+            }
 
             TweetContent = string.Empty;
+            MessageQueue.Enqueue("ツイートしました");
             _logger.Info("end");
         }
         /// <summary>
