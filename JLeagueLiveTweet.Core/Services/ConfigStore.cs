@@ -146,8 +146,20 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Core.Services
         public string GetTwitterAccessToken()
         {
             _logger.Info("start");
+            string ret = string.Empty;
+            if (!string.IsNullOrEmpty(_config.TwitterAccessToken))
+            {
+                try
+                {
+                    ret = Unprotect(_config.TwitterAccessToken);
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error(ex.Message);
+                }
+            }
             _logger.Info("end");
-            return string.IsNullOrEmpty(_config.TwitterAccessToken) ? string.Empty : Unprotect(_config.TwitterAccessToken);
+            return ret;
         }
 
         /// <summary>
@@ -157,7 +169,19 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Core.Services
         public void SetTwitterAccessToken(string value)
         {
             _logger.Info("start");
-            _config.TwitterAccessToken = string.IsNullOrEmpty(value) ? string.Empty : Protect(value);
+            string src = value;
+            if (!string.IsNullOrEmpty(value))
+            {
+                try
+                {
+                    src = Protect(value);
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error(ex.Message);
+                }
+            }
+            _config.TwitterAccessToken = src;
             Serialize(_config, _configFilePath);
             _logger.Info("end");
         }
@@ -169,8 +193,20 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Core.Services
         public string GetTwitterAccessTokenSecret()
         {
             _logger.Info("start");
+            string ret = string.Empty;
+            if (!string.IsNullOrEmpty(_config.TwitterAccessTokenSecret))
+            {
+                try
+                {
+                    ret = Unprotect(_config.TwitterAccessTokenSecret);
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error(ex.Message);
+                }
+            }
             _logger.Info("end");
-            return string.IsNullOrEmpty(_config.TwitterAccessTokenSecret) ? string.Empty : Unprotect(_config.TwitterAccessTokenSecret);
+            return ret;
         }
 
         /// <summary>
@@ -180,7 +216,19 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Core.Services
         public void SetTwitterAccessTokenSecret(string value)
         {
             _logger.Info("start");
-            _config.TwitterAccessTokenSecret = string.IsNullOrEmpty(value) ? string.Empty : Protect(value);
+            string src = value;
+            if (!string.IsNullOrEmpty(value))
+            {
+                try
+                {
+                    src = Protect(value);
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error(ex.Message);
+                }
+            }
+            _config.TwitterAccessTokenSecret = src;
             Serialize(_config, _configFilePath);
             _logger.Info("end");
         }
