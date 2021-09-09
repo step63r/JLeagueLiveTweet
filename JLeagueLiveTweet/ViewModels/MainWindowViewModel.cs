@@ -1,4 +1,5 @@
 ﻿using log4net;
+using MaterialDesignThemes.Wpf;
 using MinatoProject.Apps.JLeagueLiveTweet.Core.Models;
 using MinatoProject.Apps.JLeagueLiveTweet.Core.Services;
 using Prism.Commands;
@@ -52,10 +53,17 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.ViewModels
         public string MyClubDivision
         {
             get => _myClubDivision;
-            set
-            {
-                _ = SetProperty(ref _myClubDivision, value);
-            }
+            set => _ = SetProperty(ref _myClubDivision, value);
+        }
+
+        private SnackbarMessageQueue _messageQueue = new SnackbarMessageQueue();
+        /// <summary>
+        /// スナックバーに表示するメッセージのキュー
+        /// </summary>
+        public SnackbarMessageQueue MessageQueue
+        {
+            get => _messageQueue;
+            set => _ = SetProperty(ref _messageQueue, value);
         }
         #endregion
 
@@ -138,7 +146,8 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.ViewModels
             }
 
             // イベントの登録
-            _eventAggregator.GetEvent<PubSubEvent<Club>>().Subscribe(RefreshHeader);
+            _ = _eventAggregator.GetEvent<PubSubEvent<Club>>().Subscribe(RefreshHeader);
+            _ = _eventAggregator.GetEvent<PubSubEvent<string>>().Subscribe(ShowSnackbar);
             _logger.Info("end");
         }
 
@@ -195,6 +204,17 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.ViewModels
             _logger.Info("start");
             MyClubName = club.Name;
             MyClubDivision = $"明治安田生命{club.Division}リーグ";
+            _logger.Info("end");
+        }
+
+        /// <summary>
+        /// スナックバーにメッセージを表示する
+        /// </summary>
+        /// <param name="message"></param>
+        private void ShowSnackbar(string message)
+        {
+            _logger.Info("start");
+            MessageQueue.Enqueue(message);
             _logger.Info("end");
         }
     }

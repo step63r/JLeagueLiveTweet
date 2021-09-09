@@ -1,16 +1,15 @@
 ﻿using log4net;
-using MaterialDesignThemes.Wpf;
 using Microsoft.VisualBasic;
 using MinatoProject.Apps.JLeagueLiveTweet.Core.Models;
 using MinatoProject.Apps.JLeagueLiveTweet.Core.Services;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
 using Prism.Commands;
+using Prism.Events;
 using Prism.Mvvm;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -98,16 +97,6 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
             get => _isProgressing;
             set => _ = SetProperty(ref _isProgressing, value);
         }
-
-        private SnackbarMessageQueue _messageQueue = new SnackbarMessageQueue();
-        /// <summary>
-        /// スナックバーに表示するメッセージのキュー
-        /// </summary>
-        public SnackbarMessageQueue MessageQueue
-        {
-            get => _messageQueue;
-            set => _ = SetProperty(ref _messageQueue, value);
-        }
         #endregion
 
         #region コマンド
@@ -115,6 +104,13 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
         /// 選手情報更新コマンド
         /// </summary>
         public DelegateCommand UpdatePlayersCommand { get; private set; }
+        #endregion
+
+        #region インターフェイス
+        /// <summary>
+        /// IEventAggregator
+        /// </summary>
+        private readonly IEventAggregator _eventAggregator = null;
         #endregion
 
         #region メンバ変数
@@ -136,9 +132,13 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        public PlayersPageViewModel()
+        /// <param name="eventAggregator">IEventAggregator</param>
+        public PlayersPageViewModel(IEventAggregator eventAggregator)
         {
             _logger.Info("start");
+            // インターフェイスの取得
+            _eventAggregator = eventAggregator;
+
             Clubs = new ObservableCollection<Club>(_clubsStore.GetClubs());
             UpdatePlayersCommand = new DelegateCommand(async () => await ExecuteUpdatePlayersCommand(), CanExecuteUpdatePlayersCommand)
                 .ObservesProperty(() => SelectedClub);
@@ -245,7 +245,7 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
             {
                 snackbarMessage = "選手情報の取得が完了しました";
             }
-            MessageQueue.Enqueue(snackbarMessage);
+            _eventAggregator.GetEvent<PubSubEvent<string>>().Publish(snackbarMessage);
             _logger.Info("end");
         }
         /// <summary>

@@ -36,7 +36,6 @@
                     </DataGrid.Columns>
                 </DataGrid>
             </Grid>
-            <materialDesign:Snackbar MessageQueue="{Binding MessageQueue}" Grid.Row="1" />
         </Grid>
     </materialDesign:DialogHost>
 </UserControl>

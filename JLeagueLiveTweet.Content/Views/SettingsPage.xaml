@@ -5,22 +5,50 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:prism="http://prismlibrary.com/"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:converters="clr-namespace:MinatoProject.Apps.JLeagueLiveTweet.Content.Converters"
              prism:ViewModelLocator.AutoWireViewModel="True"
              mc:Ignorable="d"
              d:DesignHeight="720" d:DesignWidth="960">
+    <UserControl.Resources>
+        <converters:BitmapImageConverter x:Key="BitmapImageConverter" />
+    </UserControl.Resources>
     <Grid Margin="16">
         <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
             <RowDefinition Height="auto" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="auto" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
-        <Grid Grid.Row="0" Grid.Column="0" Margin="0 0 8 0">
+        <Grid Grid.Row="0" Grid.Column="0" Margin="0 0 8 16">
             <TextBlock Text="マイクラブ：" VerticalAlignment="Center" />
         </Grid>
-        <Grid Grid.Row="0" Grid.Column="1">
+        <Grid Grid.Row="0" Grid.Column="1" Margin="0 0 8 16">
             <ComboBox ItemsSource="{Binding Clubs}" DisplayMemberPath="Name" SelectedItem="{Binding SelectedClub}" MinWidth="200" />
+        </Grid>
+        <Grid Grid.Row="1" Grid.Column="0" Margin="0 0 8 16">
+            <TextBlock Text="Twitterアカウント：" VerticalAlignment="Center" />
+        </Grid>
+        <Grid Grid.Row="1" Grid.Column="1" Margin="0 0 8 16">
+            <StackPanel Orientation="Horizontal">
+                <materialDesign:Chip MinWidth="120" Margin="0 0 16 0">
+                    <materialDesign:Chip.Content>
+                        <TextBlock>
+                            <TextBlock.Text>
+                                <MultiBinding StringFormat="{}{0} @{1}">
+                                    <Binding Path="TwitterAccount.User.Name" />
+                                    <Binding Path="TwitterAccount.User.ScreenNameResponse" />
+                                </MultiBinding>
+                            </TextBlock.Text>
+                        </TextBlock>
+                    </materialDesign:Chip.Content>
+                    <materialDesign:Chip.Icon>
+                        <Image Source="{Binding TwitterAccount.User.ProfileImageUrlHttps, Converter={StaticResource BitmapImageConverter}}" />
+                    </materialDesign:Chip.Icon>
+                </materialDesign:Chip>
+                <Button Content="Twitterアカウント連携" Command="{Binding AuthorizeTwitterCommand}" />
+            </StackPanel>
         </Grid>
     </Grid>
 </UserControl>

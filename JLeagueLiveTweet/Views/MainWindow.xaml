@@ -45,6 +45,7 @@
             <Grid Grid.Row="1">
                 <ContentControl prism:RegionManager.RegionName="ContentRegion" />
             </Grid>
+            <materialDesign:Snackbar MessageQueue="{Binding MessageQueue}" Grid.Row="1" />
         </Grid>
     </materialDesign:DrawerHost>
 </Window>

@@ -51,6 +51,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ContentModule.cs" />
+    <Compile Include="Converters\BitmapImageConverter.cs" />
     <Compile Include="Domain\TwitterPinCodeValidationRule.cs" />
     <Compile Include="Extensions\EnumExtension.cs" />
     <Compile Include="Models\GameProgress.cs" />
