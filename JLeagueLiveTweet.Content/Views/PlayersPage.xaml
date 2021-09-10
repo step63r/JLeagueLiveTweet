@@ -28,7 +28,7 @@
                 </StackPanel>
             </Grid>
             <Grid Grid.Row="1" Margin="5">
-                <DataGrid ItemsSource="{Binding Players}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False">
+                <DataGrid ItemsSource="{Binding Players}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" IsReadOnly="True">
                     <DataGrid.Columns>
                         <materialDesign:DataGridTextColumn Header="背番号" Binding="{Binding Number}" />
                         <materialDesign:DataGridTextColumn Header="ポジション" Binding="{Binding Position}" />

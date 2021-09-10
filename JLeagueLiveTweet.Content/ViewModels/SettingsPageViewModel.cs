@@ -21,6 +21,13 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
     /// </summary>
     public class SettingsPageViewModel : BindableBase
     {
+        #region 定数
+        /// <summary>
+        /// Twitter連携用ID
+        /// </summary>
+        private const string TwitterAppId = "21855160";
+        #endregion
+
         #region プロパティ
         private ObservableCollection<Club> _clubs = new ObservableCollection<Club>();
         /// <summary>
@@ -66,6 +73,10 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
         /// Twitter認証コマンド
         /// </summary>
         public DelegateCommand AuthorizeTwitterCommand { get; private set; }
+        /// <summary>
+        /// Twitter連携解除コマンド
+        /// </summary>
+        public DelegateCommand RevokeTwitterCommand { get; private set; }
         #endregion
 
         #region インターフェイス
@@ -111,14 +122,16 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
 
             if (_configStore.GetConfig().MyClub != null)
             {
-                SelectedClub = Clubs.First(p => p.Name.Equals(_configStore.GetConfig().MyClub.Name));
+                SelectedClub = Clubs.First(p => p.Equals(_configStore.GetConfig().MyClub));
             }
 
             // コマンドの登録
             AuthorizeTwitterCommand = new DelegateCommand(async () => await ExecuteAuthorizeTwitterCommand(), CanExecuteAuthorizeTwitterCommand)
                 .ObservesProperty(() => TwitterAccount);
+            RevokeTwitterCommand = new DelegateCommand(ExecuteRevokeTwitterCommand, CanExecuteRevokeTwitterCommand)
+                .ObservesProperty(() => TwitterAccount);
 
-            if (!string.IsNullOrEmpty(_configStore.GetTwitterAccessToken()) && 
+            if (!string.IsNullOrEmpty(_configStore.GetTwitterAccessToken()) &&
                 !string.IsNullOrEmpty(_configStore.GetTwitterAccessTokenSecret()))
             {
                 var auth = SingleUserAuthorizeAsync().Result;
@@ -170,6 +183,29 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
         private bool CanExecuteAuthorizeTwitterCommand()
         {
             return TwitterAccount == null;
+        }
+
+        /// <summary>
+        /// Twitter連携解除コマンドを実行する
+        /// </summary>
+        private void ExecuteRevokeTwitterCommand()
+        {
+            _logger.Info("start");
+            _configStore.SetTwitterAccessToken(string.Empty);
+            _configStore.SetTwitterAccessTokenSecret(string.Empty);
+            TwitterAccount = null;
+            _eventAggregator.GetEvent<PubSubEvent<string>>().Publish("設定を削除しました。Twitterアカウントからアプリの許可を取り消してください");
+
+            _ = Process.Start($@"https://twitter.com/settings/applications/{TwitterAppId}");
+            _logger.Info("end");
+        }
+        /// <summary>
+        /// Twitter連携解除コマンドが実行可能かどうかを判定する
+        /// </summary>
+        /// <returns></returns>
+        private bool CanExecuteRevokeTwitterCommand()
+        {
+            return TwitterAccount != null;
         }
 
         /// <summary>

@@ -9,6 +9,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JLeagueLiveTweet.Content", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JLeagueLiveTweet.Core", "JLeagueLiveTweet.Core\JLeagueLiveTweet.Core.csproj", "{33EF1029-3E38-417A-BEE0-74AA750589C9}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A29CE9D8-EB6A-4F69-959F-A32C85DDF77B}"
+	ProjectSection(SolutionItems) = preProject
+		JLeagueLiveTweet.png = JLeagueLiveTweet.png
+		LICENSE = LICENSE
+		README.md = README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

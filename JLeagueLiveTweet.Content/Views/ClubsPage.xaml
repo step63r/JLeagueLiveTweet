@@ -11,7 +11,7 @@
              mc:Ignorable="d"
              d:DesignHeight="720" d:DesignWidth="960">
     <Grid Margin="5">
-        <DataGrid ItemsSource="{Binding Clubs}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False">
+        <DataGrid ItemsSource="{Binding Clubs}" SelectedItem="{Binding SelectedClub}" SelectionMode="Single" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False">
             <DataGrid.Columns>
                 <materialDesign:DataGridTextColumn Header="クラブ名" Binding="{Binding Name}" IsReadOnly="True" />
                 <materialDesign:DataGridTextColumn Header="略称" Binding="{Binding Abbreviation}" EditingElementStyle="{StaticResource MaterialDesignDataGridTextColumnPopupEditingStyle}" />

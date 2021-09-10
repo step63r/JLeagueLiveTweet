@@ -1,4 +1,5 @@
-﻿using System.Xml.Serialization;
+﻿using System;
+using System.Xml.Serialization;
 
 namespace MinatoProject.Apps.JLeagueLiveTweet.Core.Models
 {
@@ -6,7 +7,7 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Core.Models
     /// 選手データクラス
     /// </summary>
     [XmlRoot]
-    public class Player
+    public class Player : IEquatable<Player>
     {
         /// <summary>
         /// 所属クラブ
@@ -28,5 +29,20 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Core.Models
         /// </summary>
         [XmlElement]
         public Position Position { get; set; }
+
+        #region IEquatable
+        /// <summary>
+        /// インスタンスの等価性を判断する
+        /// </summary>
+        /// <param name="other">別のインスタンス</param>
+        /// <returns></returns>
+        public bool Equals(Player other)
+        {
+            return (Club == null || Club.Equals(other.Club)) &&
+                Number == other.Number &&
+                Name.Equals(other.Name) &&
+                Position == other.Position;
+        }
+        #endregion
     }
 }

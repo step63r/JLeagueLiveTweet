@@ -126,6 +126,10 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
         /// 選手情報をストアするインスタンス
         /// </summary>
         private readonly PlayersStore _playersStore = PlayersStore.GetInstance();
+        /// <summary>
+        /// ユーザー設定情報をストアするインスタンス
+        /// </summary>
+        private readonly ConfigStore _configStore = ConfigStore.GetInstance();
         #endregion
 
         #region コンストラクタ
@@ -206,7 +210,7 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
                                     index++;
                                     continue;
                                 }
-                                string name = Regex.Match(numberAndNameText, @"[^ -~｡-ﾟ]+").Value;
+                                string name = Regex.Match(numberAndNameText, @"[^ -~｡-ﾟ]+").Value.Replace("　", " ");
 
                                 _logger.Debug($"Find element: {XPath.PositionText.Replace("PLAYER_ROW_NUM", index.ToString())}");
                                 string positionText = driver.FindElement(By.XPath(XPath.PositionText.Replace("PLAYER_ROW_NUM", index.ToString()))).Text;
@@ -246,6 +250,12 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
                 snackbarMessage = "選手情報の取得が完了しました";
             }
             _eventAggregator.GetEvent<PubSubEvent<string>>().Publish(snackbarMessage);
+
+            // 自クラブの選手情報を更新していたらスコアボード画面にも反映する
+            if (SelectedClub.Equals(_configStore.GetConfig().MyClub))
+            {
+                _eventAggregator.GetEvent<PubSubEvent<IList<Player>>>().Publish(players);
+            }
             _logger.Info("end");
         }
         /// <summary>

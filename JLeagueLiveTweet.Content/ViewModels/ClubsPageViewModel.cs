@@ -19,6 +19,20 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
             get => _clubs;
             set => _ = SetProperty(ref _clubs, value);
         }
+
+        private Club _selectedClub = null;
+        /// <summary>
+        /// 選択されたクラブ
+        /// </summary>
+        public Club SelectedClub
+        {
+            get => _selectedClub;
+            set
+            {
+                _ = SetProperty(ref _selectedClub, value);
+                _clubsStore.SetClub(_selectedClub);
+            }
+        }
         #endregion
 
         #region メンバ変数
@@ -29,7 +43,7 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
         /// <summary>
         /// クラブ情報をストアするインスタンス
         /// </summary>
-        private ClubsStore _clubsStore = ClubsStore.GetInstance();
+        private readonly ClubsStore _clubsStore = ClubsStore.GetInstance();
         #endregion
 
         #region コンストラクタ

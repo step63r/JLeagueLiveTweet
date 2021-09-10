@@ -9,6 +9,7 @@ using Prism.Events;
 using Prism.Mvvm;
 using Prism.Services.Dialogs;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
@@ -319,6 +320,7 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
 
             // イベントの登録
             _ = _eventAggregator.GetEvent<PubSubEvent<Club>>().Subscribe(UpdateMyClub);
+            _ = _eventAggregator.GetEvent<PubSubEvent<IList<Player>>>().Subscribe(UpdateAllPlayers);
             _logger.Info("end");
         }
 
@@ -722,6 +724,22 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
                     new Player { Club = null, Number = -1, Name = "オウンゴール", Position = default }
                 };
             }
+            _logger.Info("end");
+        }
+
+        /// <summary>
+        /// 他のViewModelからマイクラブの選手情報更新を受け取ったときのイベント
+        /// </summary>
+        /// <param name="players">選手情報</param>
+        private void UpdateAllPlayers(IList<Player> players)
+        {
+            _logger.Info("start");
+            // 自クラブの選手一覧を取得
+            AllPlayers = new ObservableCollection<Player>(_playersStore.GetPlayers(MyClub))
+            {
+                // オウンゴールの人を作っておく
+                new Player { Club = null, Number = -1, Name = "オウンゴール", Position = default }
+            };
             _logger.Info("end");
         }
     }

@@ -1,9 +1,8 @@
-﻿using log4net;
-using MinatoProject.Apps.JLeagueLiveTweet.Core.Models;
+﻿using MinatoProject.Apps.JLeagueLiveTweet.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
+using System.Linq;
 
 namespace MinatoProject.Apps.JLeagueLiveTweet.Core.Services
 {
@@ -85,6 +84,21 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Core.Services
         {
             _logger.Info("start");
             _clubs.Add(club);
+            Serialize(_clubs as List<Club>, _clubsFilePath);
+            _logger.Info("end");
+            return _clubs;
+        }
+
+        /// <summary>
+        /// クラブを更新する
+        /// </summary>
+        /// <param name="club">クラブ</param>
+        /// <returns>更新後のクラブ一覧</returns>
+        public IList<Club> SetClub(Club club)
+        {
+            _logger.Info("start");
+            var target = (_clubs as List<Club>).First(p => p.Name.Equals(club.Name));
+            target = club;
             Serialize(_clubs as List<Club>, _clubsFilePath);
             _logger.Info("end");
             return _clubs;
