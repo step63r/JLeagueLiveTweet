@@ -15,6 +15,7 @@ DAZN‚ÅJƒŠ[ƒO‚Ìƒ‰ƒCƒu’†Œp‚ğŒ©‚È‚ª‚çí‹µ‚ğƒŠƒAƒ‹ƒ^ƒCƒ€‚ÅƒcƒC[ƒg‚·‚é‚½‚ß‚¾‚¯‚ÌƒAƒ
 - Windows 11 Pro 20H1+
 - .NET Framework 4.8
 - Visual Studio 2019
+- Google Chrome 93.0.4577+
 
 ## Usage
 
@@ -31,6 +32,8 @@ $ git clone git@github.com:yourname/JLeagueLiveTweet.git
 ## For Application Users
 
 –{ƒAƒvƒŠƒP[ƒVƒ‡ƒ“‚ÍWindowsê—p‚Å‚·B‘¼‚ÌOS‚Å‚Í—˜—p‚Å‚«‚Ü‚¹‚ñB
+
+‚Ü‚½“®ì‚É‚Í **Google Chrome 93** ˆÈã‚ª•K—v‚Å‚·B
 
 [Releases](https://github.com/step63r/JLeagueLiveTweet/releases/latest) ‚©‚çÅV‚ÌƒCƒ“ƒXƒg[ƒ‰‚ğƒ_ƒEƒ“ƒ[ƒh‚µ‚ÄƒCƒ“ƒXƒg[ƒ‹‚µ‚Ä‚­‚¾‚³‚¢B
 
