@@ -52,7 +52,14 @@
                 </Grid>
                 <Grid Grid.Row="1" Margin="5">
                     <!--<TextBlock Text="45分計" VerticalAlignment="Center" HorizontalAlignment="Center" />-->
-                    <TextBlock Text="{Binding QuarterTime, StringFormat={}{0:mm\\:ss}}" Style="{StaticResource MaterialDesignHeadline4TextBlock}" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                    <TextBlock Style="{StaticResource MaterialDesignHeadline4TextBlock}" VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <TextBlock.Text>
+                            <MultiBinding StringFormat="{} {0:00}:{1:D2}">
+                                <Binding Path="QuarterTime.TotalMinutes" />
+                                <Binding Path="QuarterTime.Seconds" />
+                            </MultiBinding>
+                        </TextBlock.Text>
+                    </TextBlock>
                 </Grid>
             </Grid>
             <Grid Grid.Column="1">

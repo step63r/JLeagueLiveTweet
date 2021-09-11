@@ -621,11 +621,11 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
 
                 case TweetType.GetScore:
                     ret = $"{ScoreBoard.HomeClub.Abbreviation} {ScoreBoard.HomeTotalScore} - {ScoreBoard.AwayTotalScore} {ScoreBoard.AwayClub.Abbreviation}" + Environment.NewLine +
-                        $"{QuarterTime.Minutes + 1}分 {SelectedPlayer.Name} {MyClub.HashTag}";
+                        $"{(int)QuarterTime.TotalMinutes + 1}分 {SelectedPlayer.Name} {MyClub.HashTag}";
                     break;
 
                 case TweetType.LostScore:
-                    ret = $"{ScoreBoard.HomeClub.Abbreviation} {ScoreBoard.HomeTotalScore} - {ScoreBoard.AwayTotalScore} {ScoreBoard.AwayClub.Abbreviation}";
+                    ret = $"{ScoreBoard.HomeClub.Abbreviation} {ScoreBoard.HomeTotalScore} - {ScoreBoard.AwayTotalScore} {ScoreBoard.AwayClub.Abbreviation} {MyClub.HashTag}";
                     break;
                 default:
                     _logger.Error($"The value of {nameof(tweetType)} is invalid");
