@@ -356,7 +356,7 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
 
                 case GameProgress.FirstHalf:
                     _quarterDispatcherTimer.Stop();
-                    QuarterTime = new TimeSpan(0, 45, 0);
+                    QuarterTime = new TimeSpan(0, 0, 0);
                     TweetContent = CreateTweetString(TweetType.Status);
                     break;
 
@@ -601,8 +601,7 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
         /// <param name="e"></param>
         private void OnQuarterDispatcherTimerTicked(object sender, EventArgs e)
         {
-            var addMinutes = GameProgress == GameProgress.SecondHalf ? new TimeSpan(0, 45, 0) : new TimeSpan();
-            QuarterTime = DateTime.Now - _quarterDispatcherTimerStartedAt + addMinutes;
+            QuarterTime = DateTime.Now - _quarterDispatcherTimerStartedAt;
         }
 
         /// <summary>
@@ -620,8 +619,11 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
                     break;
 
                 case TweetType.GetScore:
+                    double totalMinutes = GameProgress == GameProgress.SecondHalf 
+                        ? (QuarterTime + new TimeSpan(0, 45, 0)).TotalMinutes
+                        : QuarterTime.TotalMinutes;
                     ret = $"{ScoreBoard.HomeClub.Abbreviation} {ScoreBoard.HomeTotalScore} - {ScoreBoard.AwayTotalScore} {ScoreBoard.AwayClub.Abbreviation}" + Environment.NewLine +
-                        $"{(int)QuarterTime.TotalMinutes + 1}分 {SelectedPlayer.Name} {MyClub.HashTag}";
+                        $"{(int)totalMinutes + 1}分 {SelectedPlayer.Name} {MyClub.HashTag}";
                     break;
 
                 case TweetType.LostScore:

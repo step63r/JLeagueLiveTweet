@@ -1,0 +1,103 @@
+﻿<UserControl x:Class="MinatoProject.Apps.JLeagueLiveTweet.Content.Controls.AnalogClock"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:MinatoProject.Apps.JLeagueLiveTweet.Content.Controls">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/JLeagueLiveTweet.Content;component/Styles/ContentResourceDictionary.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Canvas Width="200" Height="200">
+        <!-- 15分刻み -->
+        <Line Style="{StaticResource ThickLine}">
+            <Line.RenderTransform>
+                <RotateTransform CenterX="100" CenterY="100" Angle="0"/>
+            </Line.RenderTransform>
+        </Line>
+        <Line Style="{StaticResource ThickLine}">
+            <Line.RenderTransform>
+                <RotateTransform CenterX="100" CenterY="100" Angle="90"/>
+            </Line.RenderTransform>
+        </Line>
+        <Line Style="{StaticResource ThickLine}">
+            <Line.RenderTransform>
+                <RotateTransform CenterX="100" CenterY="100" Angle="180"/>
+            </Line.RenderTransform>
+        </Line>
+        <Line Style="{StaticResource ThickLine}">
+            <Line.RenderTransform>
+                <RotateTransform CenterX="100" CenterY="100" Angle="270"/>
+            </Line.RenderTransform>
+        </Line>
+
+        <!-- 5分刻み -->
+        <Line Style="{StaticResource ThinLine}">
+            <Line.RenderTransform>
+                <RotateTransform CenterX="100" CenterY="100" Angle="30"/>
+            </Line.RenderTransform>
+        </Line>
+        <Line Style="{StaticResource ThinLine}">
+            <Line.RenderTransform>
+                <RotateTransform CenterX="100" CenterY="100" Angle="60"/>
+            </Line.RenderTransform>
+        </Line>
+        <Line Style="{StaticResource ThinLine}">
+            <Line.RenderTransform>
+                <RotateTransform CenterX="100" CenterY="100" Angle="120"/>
+            </Line.RenderTransform>
+        </Line>
+        <Line Style="{StaticResource ThinLine}">
+            <Line.RenderTransform>
+                <RotateTransform CenterX="100" CenterY="100" Angle="150"/>
+            </Line.RenderTransform>
+        </Line>
+        <Line Style="{StaticResource ThinLine}">
+            <Line.RenderTransform>
+                <RotateTransform CenterX="100" CenterY="100" Angle="210"/>
+            </Line.RenderTransform>
+        </Line>
+        <Line Style="{StaticResource ThinLine}">
+            <Line.RenderTransform>
+                <RotateTransform CenterX="100" CenterY="100" Angle="240"/>
+            </Line.RenderTransform>
+        </Line>
+        <Line Style="{StaticResource ThinLine}">
+            <Line.RenderTransform>
+                <RotateTransform CenterX="100" CenterY="100" Angle="300"/>
+            </Line.RenderTransform>
+        </Line>
+        <Line Style="{StaticResource ThinLine}">
+            <Line.RenderTransform>
+                <RotateTransform CenterX="100" CenterY="100" Angle="330"/>
+            </Line.RenderTransform>
+        </Line>
+
+        <Line x:Name="HourLine" Stroke="#2c3e50" Fill="#2c3e50" X1="100" Y1="100" X2="100" Y2="35" StrokeThickness="3">
+            <Line.Effect>
+                <DropShadowEffect BlurRadius="10" RenderingBias="Quality" ShadowDepth="2" />
+            </Line.Effect>
+            <Line.RenderTransform>
+                <RotateTransform x:Name="AngleHour" Angle="0" CenterX="100" CenterY="100" />
+            </Line.RenderTransform>
+        </Line>
+        <Line x:Name="MinuteLine" Stroke="#2c3e50" Fill="#2c3e50" X1="100" Y1="100" X2="100" Y2="15" StrokeThickness="2">
+            <Line.Effect>
+                <DropShadowEffect BlurRadius="10" RenderingBias="Quality" ShadowDepth="2" />
+            </Line.Effect>
+            <Line.RenderTransform>
+                <RotateTransform x:Name="AngleMinute" Angle="0" CenterX="100" CenterY="100" />
+            </Line.RenderTransform>
+        </Line>
+        <Line x:Name="SecondLine"  Stroke="#2c3e50" Fill="#2c3e50" X1="100" Y1="120" X2="100" Y2="10">
+            <Line.Effect>
+                <DropShadowEffect BlurRadius="10" RenderingBias="Quality" ShadowDepth="2" />
+            </Line.Effect>
+            <Line.RenderTransform>
+                <RotateTransform x:Name="AngleSecond" Angle="0" CenterX="100" CenterY="100" />
+            </Line.RenderTransform>
+        </Line>
+        <Ellipse Fill="#2c3e50" Width="6" Height="6" HorizontalAlignment="Center" VerticalAlignment="Center" Canvas.Top="97" Canvas.Left="97" />
+    </Canvas>
+</UserControl>

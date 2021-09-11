@@ -3,11 +3,9 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:vm="clr-namespace:MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels"
-             xmlns:behavior="http://schemas.microsoft.com/xaml/behaviors"
-             xmlns:interactivity="clr-namespace:Reactive.Bindings.Interactivity;assembly=ReactiveProperty.WPF"
              xmlns:prism="http://prismlibrary.com/"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:controls="clr-namespace:MinatoProject.Apps.JLeagueLiveTweet.Content.Controls"
              prism:ViewModelLocator.AutoWireViewModel="True"
              mc:Ignorable="d"
              d:DesignHeight="720" d:DesignWidth="960">
@@ -47,19 +45,10 @@
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
                 <Grid Grid.Row="0" Margin="5">
-                    <!--<TextBlock Text="アナログ時計" VerticalAlignment="Center" HorizontalAlignment="Center" />-->
-                    <TextBlock Text="{Binding CurrentDateTime, StringFormat=HH:mm:ss}" Style="{StaticResource MaterialDesignHeadline4TextBlock}" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                    <controls:AnalogClock DateTime="{Binding CurrentDateTime}" IsSecondVisible="False" />
                 </Grid>
                 <Grid Grid.Row="1" Margin="5">
-                    <!--<TextBlock Text="45分計" VerticalAlignment="Center" HorizontalAlignment="Center" />-->
-                    <TextBlock Style="{StaticResource MaterialDesignHeadline4TextBlock}" VerticalAlignment="Center" HorizontalAlignment="Center">
-                        <TextBlock.Text>
-                            <MultiBinding StringFormat="{} {0:00}:{1:D2}">
-                                <Binding Path="QuarterTime.TotalMinutes" />
-                                <Binding Path="QuarterTime.Seconds" />
-                            </MultiBinding>
-                        </TextBlock.Text>
-                    </TextBlock>
+                    <controls:QuarterClock TimeSpan="{Binding QuarterTime}" />
                 </Grid>
             </Grid>
             <Grid Grid.Column="1">

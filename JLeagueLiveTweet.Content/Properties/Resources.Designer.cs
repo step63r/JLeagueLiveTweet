@@ -59,5 +59,15 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.Properties {
                 resourceCulture = value;
             }
         }
+        
+        /// <summary>
+        ///   型 System.Byte[] のローカライズされたリソースを検索します。
+        /// </summary>
+        internal static byte[] DSEG7Classic_BoldItalic {
+            get {
+                object obj = ResourceManager.GetObject("DSEG7Classic_BoldItalic", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
     }
 }
