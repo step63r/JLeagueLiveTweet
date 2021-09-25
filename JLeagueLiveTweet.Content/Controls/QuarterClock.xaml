@@ -10,6 +10,12 @@
         </ResourceDictionary>
     </UserControl.Resources>
     <Canvas x:Name="RootCanvas" Width="200" Height="200">
+        <!-- デジタル表示 -->
+        <Grid Width="{Binding ActualWidth, ElementName=RootCanvas}" Height="{Binding ActualHeight, ElementName=RootCanvas}">
+            <TextBlock x:Name="TimeSpanText" FontSize="18" FontWeight="Bold" FontStyle="Italic" FontFamily="/JLeagueLiveTweet.Content;component/Resources/#DSEG7 Classic"
+                       Background="Black" Foreground="White" Padding="5" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0 50 0 0" />
+        </Grid>
+        
         <TextBlock Text="45min" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Canvas.Top="80" />
 
         <!-- 15分刻み -->
@@ -74,11 +80,6 @@
                 <RotateTransform x:Name="AngleMinute" Angle="0" CenterX="100" CenterY="100" />
             </Line.RenderTransform>
         </Line>
-
-        <Grid Width="{Binding ActualWidth, ElementName=RootCanvas}" Height="{Binding ActualHeight, ElementName=RootCanvas}">
-            <TextBlock x:Name="TimeSpanText" FontSize="18" FontWeight="Bold" FontStyle="Italic" FontFamily="/JLeagueLiveTweet.Content;component/Resources/#DSEG7 Classic"
-                       Background="Black" Foreground="White" Padding="5" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0 50 0 0" />
-        </Grid>
 
         <Ellipse Fill="#2c3e50" Width="6" Height="6" HorizontalAlignment="Center" VerticalAlignment="Center" Canvas.Top="97" Canvas.Left="97" />
     </Canvas>
