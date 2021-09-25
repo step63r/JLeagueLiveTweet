@@ -24,5 +24,23 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.Extensions
             int j = Array.IndexOf(arr, src) + 1;
             return (arr.Length == j) ? arr[0] : arr[j];
         }
+
+        /// <summary>
+        /// 前の要素を取得する
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="src"></param>
+        /// <returns></returns>
+        public static T Before<T>(this T src) where T : struct
+        {
+            if (!typeof(T).IsEnum)
+            {
+                throw new ArgumentException($"Argument {typeof(T).FullName} is not an Enum");
+            }
+
+            var arr = (T[])Enum.GetValues(src.GetType());
+            int j = Array.IndexOf(arr, src) - 1;
+            return (j < 0) ? arr[arr.Length - 1] : arr[j];
+        }
     }
 }

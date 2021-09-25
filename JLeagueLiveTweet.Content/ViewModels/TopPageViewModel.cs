@@ -22,7 +22,7 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
     /// <summary>
     /// TopPage.xamlのViewModelクラス
     /// </summary>
-    public class TopPageViewModel : BindableBase
+    public class TopPageViewModel : BindableBase, IDisposable
     {
         /// <summary>
         /// ツイート種別
@@ -215,6 +215,11 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
             get => _tweetContent;
             set => _ = SetProperty(ref _tweetContent, value);
         }
+
+        /// <summary>
+        /// 操作したコマンドの履歴
+        /// </summary>
+        public ObservableCollection<string> CommandNameHistory { get; set; } = new ObservableCollection<string>();
         #endregion
 
         #region コマンド
@@ -234,6 +239,10 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
         /// ツイートコマンド
         /// </summary>
         public DelegateCommand TweetCommand { get; private set; }
+        /// <summary>
+        /// 直前の操作を取り消すコマンド
+        /// </summary>
+        public DelegateCommand UndoCommand { get; private set; }
         #endregion
 
 
@@ -317,6 +326,8 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
                 .ObservesProperty(() => InGameProgress);
             TweetCommand = new DelegateCommand(ExecuteTweetCommand, CanExecuteTweetCommand)
                 .ObservesProperty(() => TweetContent);
+            UndoCommand = new DelegateCommand(ExecuteUndoCommand, CanExecuteUndoCommand)
+                .ObservesProperty(() => CommandNameHistory);
 
             // イベントの登録
             _ = _eventAggregator.GetEvent<PubSubEvent<Club>>().Subscribe(UpdateMyClub);
@@ -325,9 +336,9 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
         }
 
         /// <summary>
-        /// ファイナライザ
+        /// IDisposableの実装
         /// </summary>
-        ~TopPageViewModel()
+        public void Dispose()
         {
             _logger.Info("start");
             if (_currentDispatcherTimer.IsEnabled)
@@ -335,6 +346,12 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
                 _currentDispatcherTimer.Stop();
             }
             _currentDispatcherTimer.Tick -= OnCurrentDispatcherTimerTicked;
+
+            if (_quarterDispatcherTimer.IsEnabled)
+            {
+                _quarterDispatcherTimer.Stop();
+            }
+            _quarterDispatcherTimer.Tick -= OnQuarterDispatcherTimerTicked;
             _logger.Info("end");
         }
 
@@ -382,12 +399,16 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
                         HomeClub = MyClub
                     };
                     TweetContent = string.Empty;
+                    CommandNameHistory = new ObservableCollection<string>();
                     break;
 
                 default:
                     throw new Exception($"The value of {nameof(GameProgress)} is invalid");
             }
+
             GameProgress = GameProgress.Next();
+            CommandNameHistory.Add(nameof(ExecuteQuarterTimerCommand));
+            RaisePropertyChanged(nameof(CommandNameHistory));
             _logger.Info("end");
         }
         /// <summary>
@@ -466,6 +487,9 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
             }
 
             TweetContent = CreateTweetString(TweetType.GetScore);
+
+            CommandNameHistory.Add(nameof(ExecuteGetScoreCommand));
+            RaisePropertyChanged(nameof(CommandNameHistory));
             _logger.Info("end");
         }
         /// <summary>
@@ -483,6 +507,7 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
         private void ExecuteLostScoreCommand()
         {
             _logger.Info("start");
+
             // ホーム or アウェイ
             if (IsMyClubAway)
             {
@@ -524,6 +549,9 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
             }
 
             TweetContent = CreateTweetString(TweetType.LostScore);
+
+            CommandNameHistory.Add(nameof(ExecuteLostScoreCommand));
+            RaisePropertyChanged(nameof(CommandNameHistory));
             _logger.Info("end");
         }
         /// <summary>
@@ -585,6 +613,188 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
         }
 
         /// <summary>
+        /// 直前の操作を取り消すコマンドを実行する
+        /// </summary>
+        private void ExecuteUndoCommand()
+        {
+            _logger.Info("start");
+            string lastCommand = CommandNameHistory.Last();
+            _logger.Info($"Undo {lastCommand}");
+
+            switch (lastCommand)
+            {
+                case nameof(ExecuteQuarterTimerCommand):
+                    UndoExecuteQuarterTimerCommand();
+                    break;
+
+                case nameof(ExecuteGetScoreCommand):
+                    UndoExecuteGetScoreCommand();
+                    break;
+
+                case nameof(ExecuteLostScoreCommand):
+                    UndoExecuteLostScoreCommand();
+                    break;
+
+                default:
+                    _logger.Warn($"Nothing to do for undo of {lastCommand}");
+                    break;
+            }
+
+            TweetContent = string.Empty;
+            CommandNameHistory.RemoveAt(CommandNameHistory.Count - 1);
+            RaisePropertyChanged(nameof(CommandNameHistory));
+            _logger.Info("end");
+        }
+        /// <summary>
+        /// 直前の操作を取り消すコマンドが実行可能かどうかを判定する
+        /// </summary>
+        /// <returns></returns>
+        private bool CanExecuteUndoCommand()
+        {
+            return CommandNameHistory.Count > 0;
+        }
+
+        #region 取消コマンドのサブルーチン
+        /// <summary>
+        /// 試合開始/前半終了/後半開始/試合終了を取り消す
+        /// </summary>
+        private void UndoExecuteQuarterTimerCommand()
+        {
+            _logger.Info("start");
+            switch (GameProgress)
+            {
+                case GameProgress.Before:
+                    // 何もしない
+                    break;
+
+                case GameProgress.FirstHalf:
+                    _quarterDispatcherTimer.Stop();
+                    QuarterTime = new TimeSpan(0, 0, 0);
+                    TweetContent = string.Empty;
+                    GameProgress = GameProgress.Before();
+                    break;
+
+                case GameProgress.HalfTime:
+                    _quarterDispatcherTimer.Start();
+                    TweetContent = string.Empty;
+                    GameProgress = GameProgress.Before();
+                    break;
+
+                case GameProgress.SecondHalf:
+                    _quarterDispatcherTimer.Stop();
+                    QuarterTime = new TimeSpan(0, 0, 0);
+                    TweetContent = string.Empty;
+                    GameProgress = GameProgress.Before();
+                    break;
+
+                case GameProgress.After:
+                    _quarterDispatcherTimer.Start();
+                    TweetContent = string.Empty;
+                    GameProgress = GameProgress.Before();
+                    break;
+
+                default:
+                    throw new Exception($"The value of {nameof(GameProgress)} is invalid");
+            }
+            _logger.Info("end");
+        }
+        /// <summary>
+        /// 得点を取り消す
+        /// </summary>
+        private void UndoExecuteGetScoreCommand()
+        {
+            _logger.Info("start");
+            // ホーム or アウェイ
+            if (IsMyClubAway)
+            {
+                // 前半 or 後半
+                if (GameProgress == GameProgress.FirstHalf)
+                {
+                    ScoreBoard.Away1stScore--;
+                }
+                else if (GameProgress == GameProgress.SecondHalf)
+                {
+                    ScoreBoard.Away2ndScore--;
+                }
+                else
+                {
+                    _logger.Error($"The value of {nameof(GameProgress)} is invalid");
+                    return;
+                }
+
+                RaisePropertyChanged(nameof(ScoreBoard.AwayTotalScore));
+            }
+            else
+            {
+                // 前半 or 後半
+                if (GameProgress == GameProgress.FirstHalf)
+                {
+                    ScoreBoard.Home1stScore--;
+                }
+                else if (GameProgress == GameProgress.SecondHalf)
+                {
+                    ScoreBoard.Home2ndScore--;
+                }
+                else
+                {
+                    _logger.Error($"The value of {nameof(GameProgress)} is invalid");
+                    return;
+                }
+
+                RaisePropertyChanged(nameof(ScoreBoard.HomeTotalScore));
+            }
+            _logger.Info("end");
+        }
+        /// <summary>
+        /// 失点を取り消す
+        /// </summary>
+        private void UndoExecuteLostScoreCommand()
+        {
+            _logger.Info("start");
+
+            // ホーム or アウェイ
+            if (IsMyClubAway)
+            {
+                // 前半 or 後半
+                if (GameProgress == GameProgress.FirstHalf)
+                {
+                    ScoreBoard.Home1stScore--;
+                }
+                else if (GameProgress == GameProgress.SecondHalf)
+                {
+                    ScoreBoard.Home2ndScore--;
+                }
+                else
+                {
+                    _logger.Error($"The value of {nameof(GameProgress)} is invalid");
+                    return;
+                }
+
+                RaisePropertyChanged(nameof(ScoreBoard.HomeTotalScore));
+            }
+            else
+            {
+                // 前半 or 後半
+                if (GameProgress == GameProgress.FirstHalf)
+                {
+                    ScoreBoard.Away1stScore--;
+                }
+                else if (GameProgress == GameProgress.SecondHalf)
+                {
+                    ScoreBoard.Away2ndScore--;
+                }
+                else
+                {
+                    _logger.Error($"The value of {nameof(GameProgress)} is invalid");
+                    return;
+                }
+
+                RaisePropertyChanged(nameof(ScoreBoard.AwayTotalScore));
+            }
+        }
+        #endregion
+
+        /// <summary>
         /// 現在時刻用のディスパッチャタイマーのイベントハンドラ
         /// </summary>
         /// <param name="sender"></param>
@@ -619,7 +829,7 @@ namespace MinatoProject.Apps.JLeagueLiveTweet.Content.ViewModels
                     break;
 
                 case TweetType.GetScore:
-                    double totalMinutes = GameProgress == GameProgress.SecondHalf 
+                    double totalMinutes = GameProgress == GameProgress.SecondHalf
                         ? (QuarterTime + new TimeSpan(0, 45, 0)).TotalMinutes
                         : QuarterTime.TotalMinutes;
                     ret = $"{ScoreBoard.HomeClub.Abbreviation} {ScoreBoard.HomeTotalScore} - {ScoreBoard.AwayTotalScore} {ScoreBoard.AwayClub.Abbreviation}" + Environment.NewLine +

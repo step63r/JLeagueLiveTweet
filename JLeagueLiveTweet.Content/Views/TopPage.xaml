@@ -118,7 +118,8 @@
                     <Button Content="{Binding QuarterTimerCommandContent}" Command="{Binding QuarterTimerCommand}" MinWidth="100" Margin="0 0 10 0" />
                     <ComboBox ItemsSource="{Binding AllPlayers}" DisplayMemberPath="Name" SelectedItem="{Binding SelectedPlayer}" MinWidth="150" Margin="0 0 10 0" />
                     <Button Content="得点" Command="{Binding GetScoreCommand}" MinWidth="150" Margin="0 0 20 0" />
-                    <Button Content="失点" Style="{StaticResource MaterialDesignRaisedAccentButton}" Command="{Binding LostScoreCommand}" MinWidth="150" Margin="0 0 10 0" />
+                    <Button Content="失点" Style="{StaticResource MaterialDesignRaisedAccentButton}" Command="{Binding LostScoreCommand}" MinWidth="150" Margin="0 0 20 0" />
+                    <Button Content="直前の操作を取り消す" Style="{StaticResource MaterialDesignRaisedDarkButton}" Command="{Binding UndoCommand}" MinWidth="150" Margin="0 0 20 0" />
                 </StackPanel>
             </Grid>
             <Grid Grid.Row="1" Margin="5">
